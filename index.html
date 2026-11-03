@@ -184,6 +184,20 @@ ol.passos b{color:var(--txt)}
 .toast{position:fixed;left:50%;bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 80px);transform:translateX(-50%) translateY(20px);opacity:0;background:var(--txt);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;transition:.25s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ---------- YouTube logado ---------- */
+.ytb{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--card2);font-size:13px;font-weight:500;border:1px dashed var(--mut2);color:var(--txt)}
+.chip.ok{border:1px solid #1f5a43;background:#12291f;color:#8debc0}
+.semn{display:block;width:100%;text-align:left;cursor:pointer}
+.semn u{color:var(--acc);font-weight:600}
+.yt-prev{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:12px}
+.yt-prev img{width:96px;height:54px;object-fit:cover;border-radius:8px;background:var(--card2);flex:none}
+.yt-prev b{display:block;font-size:14px;font-weight:600;line-height:1.3}
+.tag.sn{background:#3a2e14;color:#ffc56b}
+.acoes2{display:flex;gap:8px;margin-top:10px}
+.acoes2 .btn{flex:1}
+.prio,.pubs{grid-template-columns:minmax(0,1fr)}
+
 /* ---------- telas maiores ---------- */
 @media (min-width:720px){
   .hoje{grid-template-columns:repeat(3,1fr)}
@@ -233,6 +247,7 @@ ol.passos b{color:var(--txt)}
 
   <!-- PAINEL -->
   <section id="tab-painel">
+    <div id="semNota"></div>
     <div class="ttl" style="margin-top:4px"><h3>Hoje vai ao ar</h3><button class="link" data-goto="agenda">Agenda →</button></div>
     <div class="hoje" id="hoje"></div>
     <div class="ttl"><h3>Amanhã</h3></div>
@@ -270,6 +285,7 @@ ol.passos b{color:var(--txt)}
   <!-- AGENDA -->
   <section id="tab-agenda" class="hide">
     <h2>Agenda</h2>
+    <div id="ytBar"></div>
     <div class="agw">
       <div>
         <div class="ag-bar">
@@ -311,6 +327,20 @@ ol.passos b{color:var(--txt)}
         <div class="f"><input id="cApi" type="password" placeholder="Cole a chave aqui (AIza...)" autocomplete="off"></div>
         <div class="row"><button class="btn" id="cApiSalvar">Salvar e atualizar</button></div>
         <div id="cApiMsg"></div>
+      </div>
+
+      <div class="card">
+        <h3>Puxar vídeos programados do YouTube</h3>
+        <p class="sub">A chave da API só enxerga vídeos públicos. Para o painel ver os programados, você entra com a conta do canal (só leitura, ele não altera nada).</p>
+        <ol class="passos">
+          <li>No mesmo projeto do <b>Google Cloud</b>, abra <b>Google Auth Platform</b> (ou "Tela de consentimento OAuth"), escolha <b>Externo</b> e, em <b>Público-alvo → Usuários de teste</b>, adicione o seu e-mail.</li>
+          <li>Em <b>Clientes</b> (ou Credenciais) → <b>Criar cliente</b> → <b>Aplicativo da Web</b>. Em <b>Origens JavaScript autorizadas</b>, coloque <b>https://pcxsar.github.io</b>.</li>
+          <li>Copie o <b>ID do cliente</b> (termina em .apps.googleusercontent.com) e cole aqui.</li>
+          <li>Na aba <b>Agenda</b>, toque em <b>Conectar</b> em cada canal e escolha a conta daquele canal. Se aparecer "o Google não verificou este app", toque em <b>Continuar</b>.</li>
+        </ol>
+        <div class="f"><input id="cCid" placeholder="123...apps.googleusercontent.com" autocomplete="off"></div>
+        <div class="row"><button class="btn" id="cCidSalvar">Salvar</button><button class="btn sec" id="cDescon">Desconectar canais</button></div>
+        <div id="cCidMsg"></div>
       </div>
 
       <div class="card">
@@ -358,12 +388,15 @@ ol.passos b{color:var(--txt)}
 <dialog id="dlg">
   <form class="sheet" id="fAg" method="dialog">
     <h3 id="dlgT">Agendar vídeo</h3>
+    <div id="aYt" class="hide"></div>
+    <div id="aBase">
     <div class="f"><label>Canal</label><select id="aCanal" required></select></div>
     <div class="f2">
       <div class="f"><label>Dia</label><input id="aData" type="date" required></div>
       <div class="f"><label>Horário</label><input id="aHora" type="time"></div>
     </div>
     <div class="f"><label>Título do vídeo</label><input id="aTit" required placeholder="Ex.: O lago que parece de vidro"></div>
+    </div>
     <div class="f"><label>Nota que você dá para ele</label><div class="notas" id="aNotas"></div></div>
     <div class="f"><label>Situação</label>
       <select id="aSt">
@@ -373,11 +406,14 @@ ol.passos b{color:var(--txt)}
       </select>
     </div>
     <div class="f"><label>Anotações</label><textarea id="aObs" rows="2" placeholder="Ex.: gancho fraco, trocar pelo do farol"></textarea></div>
-    <div class="f"><label>Link do vídeo (opcional, para ligar nota e números)</label><input id="aVid" placeholder="youtube.com/shorts/..."></div>
+    <div class="f" id="aLink"><label>Link do vídeo (opcional, para ligar nota e números)</label><input id="aVid" placeholder="youtube.com/shorts/..."></div>
     <div class="acoes">
       <button type="button" class="btn del hide" id="aDel">Excluir</button>
       <span class="sp"></span>
       <button type="button" class="btn sec" id="aCan">Cancelar</button>
+    </div>
+    <div class="acoes2">
+      <button type="submit" class="btn sec hide" id="aProx">Salvar e próximo</button>
       <button type="submit" class="btn" id="aOk">Salvar</button>
     </div>
   </form>
@@ -392,6 +428,8 @@ const CANAIS = [
   { handle: 'LorotaGringa',    nome: 'Lorota Gringa',     cor: '#b98bff' },
   { handle: 'ORenderizado',    nome: 'O Renderizado',     cor: '#3fd6cc' },
 ];
+/* ID do cliente OAuth do Google (não é segredo). Preenchido aqui vale para todos os aparelhos. */
+const CLIENT_ID = '';
 /* =================================================================================== */
 
 const LS_D = 'painelCanais.dados', LS_C = 'painelCanais.cache', LS_CFG = 'painelCanais.cfg';
@@ -403,7 +441,7 @@ let dados = Object.assign(novoDados(), ler(LS_D, {}));
 dados.snaps = Object.assign({ canais: {}, videos: {} }, dados.snaps || {});
 dados.excluidos = dados.excluidos || {};
 let cache = ler(LS_C, { canais: {}, videos: [], em: null });
-let cfg = Object.assign({ apiKey: '', limite: 6, gh: { token: '', repo: '', branch: 'main', path: 'painel.json' } }, ler(LS_CFG, {}));
+let cfg = Object.assign({ apiKey: '', clientId: '', limite: 6, gh: { token: '', repo: '', branch: 'main', path: 'painel.json' } }, ler(LS_CFG, {}));
 let demo = false;
 
 /* ---------------- utilidades ---------------- */
@@ -473,6 +511,121 @@ async function buscarCanal(c) {
       subs: s.hiddenSubscriberCount ? null : +s.subscriberCount || 0, views: Math.max(+s.viewCount || 0, somaV), n: Math.max(+s.videoCount || 0, vids.length) },
     vids,
   };
+}
+
+/* ---------------- YouTube com login: vídeos programados ---------------- */
+const LS_T = 'painelCanais.tok';
+let toks = ler(LS_T, {});
+const clientId = () => (cfg.clientId || CLIENT_ID || '').trim();
+const tokOk = h => !!(toks[h] && toks[h].exp > Date.now() + 60000);
+const pad = n => String(n).padStart(2, '0');
+let gisP = null;
+function carregarGIS() {
+  if (window.google?.accounts?.oauth2) return Promise.resolve();
+  return gisP || (gisP = new Promise((ok, ko) => {
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+    s.onload = ok; s.onerror = () => { gisP = null; ko(new Error('não carregou o login do Google')); };
+    document.head.appendChild(s);
+  }));
+}
+async function ytAuth(tok, path, params) {
+  const u = new URL('https://www.googleapis.com/youtube/v3/' + path);
+  Object.entries(params).forEach(([k, v]) => v != null && u.searchParams.set(k, v));
+  const r = await fetch(u, { headers: { Authorization: 'Bearer ' + tok } });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(j.error?.message || 'Erro ' + r.status); e.status = r.status; throw e; }
+  return j;
+}
+function conectar(handle) {
+  if (!clientId()) { toast('Coloque o ID do cliente em Ajustes'); ir('config'); return; }
+  if (!window.google?.accounts?.oauth2) { carregarGIS().catch(e => toast(e.message)); toast('Carregando o login do Google, toque de novo'); return; }
+  const tc = google.accounts.oauth2.initTokenClient({
+    client_id: clientId(),
+    scope: 'https://www.googleapis.com/auth/youtube.readonly',
+    callback: async r => {
+      if (r.error) { toast('Login cancelado'); return; }
+      try {
+        const me = await ytAuth(r.access_token, 'channels', { part: 'id,snippet', mine: true });
+        const ch = me.items?.[0];
+        if (!ch) throw new Error('essa conta não tem canal');
+        const alvo = CANAIS.find(c => cache.canais[c.handle]?.id === ch.id || norm(ch.snippet.customUrl) === norm(c.handle));
+        if (!alvo) { toast(`O canal "${ch.snippet.title}" não está no painel`); return; }
+        toks[alvo.handle] = { t: r.access_token, exp: Date.now() + (+r.expires_in || 3600) * 1000, id: ch.id };
+        gravar(LS_T, toks);
+        if (alvo.handle !== handle) toast(`Você entrou com ${alvo.nome}`);
+        const n = await puxarProgramados([alvo.handle]);
+        toast(`${alvo.nome}: ${n.total} programado${n.total === 1 ? '' : 's'}${n.novos ? `, ${n.novos} novo${n.novos === 1 ? '' : 's'}` : ''}`);
+      } catch (e) { toast('Erro: ' + e.message); }
+    },
+  });
+  tc.requestAccessToken({ prompt: 'select_account' });
+}
+async function puxarProgramados(lista) {
+  lista = (lista || CANAIS.map(c => c.handle)).filter(tokOk);
+  const res = { novos: 0, total: 0 };
+  if (!lista.length) return res;
+  let mudou = false;
+  for (const h of lista) {
+    try {
+      const t = toks[h].t;
+      const ch = await ytAuth(t, 'channels', { part: 'contentDetails', id: toks[h].id });
+      const up = ch.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+      const ids = []; let pg;
+      for (let p = 0; p < 2 && up; p++) {
+        let pl;
+        try { pl = await ytAuth(t, 'playlistItems', { part: 'contentDetails', playlistId: up, maxResults: 50, pageToken: pg }); }
+        catch (e) { if (e.status === 404) break; throw e; }
+        (pl.items || []).forEach(i => ids.push(i.contentDetails.videoId));
+        pg = pl.nextPageToken; if (!pg) break;
+      }
+      const vids = [];
+      for (let i = 0; i < ids.length; i += 50) {
+        const v = await ytAuth(t, 'videos', { part: 'snippet,status', id: ids.slice(i, i + 50).join(','), maxResults: 50 });
+        vids.push(...(v.items || []));
+      }
+      const vistos = new Set(vids.map(v => v.id));
+      vids.forEach(v => {
+        const programado = v.status.privacyStatus !== 'public' && v.status.publishAt;
+        const id = 'yt-' + v.id;
+        let ex = dados.agenda.find(a => a.id === id) || dados.agenda.find(a => idDoLink(a.video) === v.id);
+        if (!programado && !ex) return;                       // vídeo público que não estava na agenda
+        if (programado) res.total++;
+        const d = new Date(programado ? v.status.publishAt : v.snippet.publishedAt);
+        const novo = { canal: h, data: dkey(d), hora: `${pad(d.getHours())}:${pad(d.getMinutes())}`, titulo: v.snippet.title, video: v.id, origem: 'yt',
+          thumb: v.snippet.thumbnails?.medium?.url || v.snippet.thumbnails?.default?.url || '' };
+        if (!ex) {
+          if (dados.excluidos[id]) return;                     // você tirou da agenda: não volta
+          dados.agenda.push({ id, nota: 0, status: 'agendado', obs: '', ...novo, upd: Date.now() });
+          res.novos++; mudou = true;
+        } else if (Object.keys(novo).some(k => ex[k] !== novo[k])) {
+          Object.assign(ex, novo, { upd: Date.now() }); mudou = true;
+        }
+      });
+      // programados que sumiram do canal (apagados no YouTube)
+      if (vids.length < 100) {
+        dados.agenda.filter(a => a.origem === 'yt' && a.canal === h && a.data >= hoje() && !vistos.has(a.video)).forEach(a => {
+          dados.agenda = dados.agenda.filter(x => x !== a); dados.excluidos[a.id] = Date.now(); mudou = true;
+        });
+      }
+    } catch (e) {
+      if (e.status === 401) { delete toks[h]; gravar(LS_T, toks); }
+      toast(`${canal(h).nome}: ${e.status === 401 ? 'reconecte o canal' : e.message}`);
+    }
+  }
+  if (mudou) salvarDados();
+  render();
+  return res;
+}
+const semNota = () => vivos().filter(a => !a.nota && estado(a) !== 'publicado').sort(ordAg);
+const bannerSemNota = n => n ? `<button class="aviso semn" data-rate>${n} ${n > 1 ? 'vídeos programados' : 'vídeo programado'} sem nota · <u>dar nota agora</u></button>` : '';
+function renderYtBar() {
+  let h = '';
+  if (!clientId()) h = `<div class="aviso">Dá para puxar os vídeos <b>programados</b> direto do YouTube, aí você só dá a nota. <button data-goto="config">Configurar em Ajustes</button></div>`;
+  else h = `<div class="ytb"><span class="sub">Programados do YouTube:</span>${CANAIS.map(c => tokOk(c.handle)
+    ? `<button class="chip ok" data-puxar="${c.handle}" title="Puxar de novo"><span class="dot" style="background:${c.cor}"></span>${esc(c.nome)} ✓</button>`
+    : `<button class="chip" data-con="${c.handle}"><span class="dot" style="background:${c.cor}"></span>Conectar ${esc(c.nome)}</button>`).join('')}</div>`;
+  $('#ytBar').innerHTML = h + bannerSemNota(semNota().length);
 }
 
 let atualizando = false;
@@ -546,7 +699,7 @@ const ordAg = (a, b) => (a.data + (a.hora || '99')).localeCompare(b.data + (b.ho
 function prioridade() {
   const h = hoje();
   return vivos().filter(a => a.data >= h && estado(a) !== 'publicado')
-    .sort((a, b) => ((b.status === 'substituir') - (a.status === 'substituir')) || ((a.nota || 11) - (b.nota || 11)) || ordAg(a, b));
+    .sort((a, b) => ((b.status === 'substituir') - (a.status === 'substituir')) || ((!b.nota) - (!a.nota)) || ((a.nota || 0) - (b.nota || 0)) || ordAg(a, b));
 }
 const urgente = a => estado(a) !== 'publicado' && (a.status === 'substituir' || ((a.nota || 0) <= cfg.limite)) && difD(hoje(), a.data) <= 3;
 
@@ -658,7 +811,7 @@ function renderAgenda() {
   const pr = prioridade().slice(0, 8);
   $('#prio').innerHTML = pr.length ? pr.map((a, i) => {
     const c = canal(a.canal);
-    return `<button class="pr ${urgente(a) ? 'urg' : ''}" data-edit="${a.id}" style="text-align:left;width:100%"><span class="pos">${i + 1}</span>${notaHtml(a.nota)}<div class="tx"><div class="tt">${esc(a.titulo)}</div><div class="why"><span class="dot" style="background:${c.cor};margin-right:5px"></span>${esc(c.nome)} · vai ao ar ${quando(a.data)}${a.hora ? ' às ' + a.hora : ''}${a.status === 'substituir' ? ' · marcado para trocar' : ''}</div></div>${urgente(a) ? '<span class="tag">urgente</span>' : ''}</button>`;
+    return `<button class="pr ${urgente(a) ? 'urg' : ''}" data-edit="${a.id}" style="text-align:left;width:100%"><span class="pos">${i + 1}</span>${notaHtml(a.nota)}<div class="tx"><div class="tt">${esc(a.titulo)}</div><div class="why"><span class="dot" style="background:${c.cor};margin-right:5px"></span>${esc(c.nome)} · vai ao ar ${quando(a.data)}${a.hora ? ' às ' + a.hora : ''}${a.status === 'substituir' ? ' · marcado para trocar' : ''}</div></div>${!a.nota ? '<span class="tag sn">sem nota</span>' : urgente(a) ? '<span class="tag">urgente</span>' : ''}</button>`;
   }).join('') : `<div class="sub">Nenhum vídeo agendado daqui para frente.</div>`;
 
   const vids = base().videos;
@@ -682,9 +835,9 @@ function renderTopo() {
 let aba = 'painel';
 function render() {
   renderTopo();
-  if (aba === 'painel') renderPainel();
+  if (aba === 'painel') { $('#semNota').innerHTML = bannerSemNota(semNota().length); renderPainel(); }
   if (aba === 'videos') renderVideos();
-  if (aba === 'agenda') renderAgenda();
+  if (aba === 'agenda') { renderYtBar(); renderAgenda(); }
 }
 function ir(t) {
   aba = t;
@@ -701,7 +854,15 @@ $('#aCanal').innerHTML = CANAIS.map(c => `<option value="${c.handle}">${esc(c.no
 function pintarNotas() { $('#aNotas').innerHTML = Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<button type="button" data-nota="${n}" class="${n === notaSel ? 'on ' + notaCls(n) : ''}">${n}</button>`).join(''); }
 function abrir(a, pre = {}) {
   editId = a?.id || null;
-  $('#dlgT').textContent = a ? 'Editar vídeo agendado' : 'Agendar vídeo';
+  const yt = a?.origem === 'yt';
+  $('#dlgT').textContent = yt ? (a.nota ? 'Editar nota' : 'Dar nota') : a ? 'Editar vídeo agendado' : 'Agendar vídeo';
+  $('#aBase').classList.toggle('hide', yt); $('#aLink').classList.toggle('hide', yt);
+  $('#aYt').classList.toggle('hide', !yt);
+  if (yt) {
+    const c = canal(a.canal);
+    $('#aYt').innerHTML = `<div class="yt-prev">${a.thumb ? `<img src="${esc(a.thumb)}" alt="">` : ''}<div style="min-width:0"><div class="cn"><span class="dot" style="background:${c.cor}"></span>${esc(c.nome)} · ${diaCurto(a.data)}${a.hora ? ' às ' + a.hora : ''}</div><b>${esc(a.titulo)}</b><a class="sub" style="font-size:12px" href="https://studio.youtube.com/video/${esc(a.video)}/edit" target="_blank" rel="noopener">Abrir no YouTube Studio ↗</a></div></div>`;
+  }
+  $('#aProx').classList.toggle('hide', !semNota().some(x => x.id !== editId));
   $('#aCanal').value = a?.canal || pre.canal || CANAIS[0].handle;
   $('#aData').value = a?.data || pre.data || hoje();
   $('#aHora').value = a?.hora || '';
@@ -720,10 +881,13 @@ $('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) $('#dlg')
 $('#fAg').addEventListener('submit', e => {
   e.preventDefault();
   if (!notaSel) { toast('Escolha uma nota de 1 a 10'); return; }
-  const item = { id: editId || uid(), canal: $('#aCanal').value, data: $('#aData').value, hora: $('#aHora').value, titulo: $('#aTit').value.trim(), nota: notaSel, status: $('#aSt').value, obs: $('#aObs').value.trim(), video: $('#aVid').value.trim(), upd: Date.now() };
+  const prox = e.submitter?.id === 'aProx';
+  const old = dados.agenda.find(a => a.id === editId) || {};
+  const item = { ...old, id: editId || uid(), canal: $('#aCanal').value, data: $('#aData').value, hora: $('#aHora').value, titulo: $('#aTit').value.trim(), nota: notaSel, status: $('#aSt').value, obs: $('#aObs').value.trim(), video: $('#aVid').value.trim(), upd: Date.now() };
   const i = dados.agenda.findIndex(a => a.id === item.id);
   if (i >= 0) dados.agenda[i] = item; else dados.agenda.push(item);
-  $('#dlg').close(); salvarDados(); render(); toast(editId ? 'Atualizado' : 'Agendado');
+  $('#dlg').close(); salvarDados(); render(); toast(editId ? 'Salvo' : 'Agendado');
+  if (prox) { const n = semNota()[0]; if (n) abrir(n); }
 });
 $('#aDel').onclick = () => {
   if (!editId || !confirm('Excluir este vídeo da agenda?')) return;
@@ -791,7 +955,7 @@ async function sincronizar(msgEl) {
 
 /* ---------------- ajustes ---------------- */
 function preencherCfg() {
-  $('#cApi').value = cfg.apiKey; $('#cTok').value = cfg.gh.token; $('#cRepo').value = cfg.gh.repo;
+  $('#cApi').value = cfg.apiKey; $('#cCid').value = clientId(); $('#cTok').value = cfg.gh.token; $('#cRepo').value = cfg.gh.repo;
   $('#cBr').value = cfg.gh.branch || 'main'; $('#cPath').value = cfg.gh.path || 'painel.json';
   $('#cLim').innerHTML = Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<option value="${n}" ${n === cfg.limite ? 'selected' : ''}>Nota ${n} ou menos</option>`).join('');
 }
@@ -810,6 +974,18 @@ $('#cGhSalvar').onclick = () => {
   sincronizar($('#cGhMsg'));
 };
 $('#cGhDesl').onclick = () => { cfg.gh = { token: '', repo: '', branch: 'main', path: 'painel.json' }; gravar(LS_CFG, cfg); preencherCfg(); $('#cGhMsg').innerHTML = '<div class="sub" style="margin-top:8px">Sincronização desligada. A agenda continua salva neste navegador.</div>'; };
+$('#cCidSalvar').onclick = () => {
+  const v = $('#cCid').value.trim();
+  if (v && !/\.apps\.googleusercontent\.com$/.test(v)) { $('#cCidMsg').innerHTML = '<div class="ko">Esse não parece um ID do cliente. Ele termina em .apps.googleusercontent.com</div>'; return; }
+  cfg.clientId = v; gravar(LS_CFG, cfg);
+  if (v) carregarGIS().catch(() => {});
+  $('#cCidMsg').innerHTML = v ? '<div class="ok">Salvo. Agora vá na Agenda e toque em Conectar em cada canal.</div>' : '';
+};
+$('#cDescon').onclick = () => {
+  Object.values(toks).forEach(t => { try { google.accounts.oauth2.revoke(t.t); } catch {} });
+  toks = {}; gravar(LS_T, toks);
+  $('#cCidMsg').innerHTML = '<div class="sub" style="margin-top:8px">Canais desconectados neste navegador.</div>';
+};
 $('#cLim').onchange = e => { cfg.limite = +e.target.value; gravar(LS_CFG, cfg); };
 $('#cExp').onclick = () => {
   const a = document.createElement('a');
@@ -826,16 +1002,19 @@ $('#cImpF').onchange = async e => {
 
 /* ---------------- eventos gerais ---------------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-tab],[data-goto],[data-edit],[data-novo],[data-fc]');
+  const t = e.target.closest('[data-tab],[data-goto],[data-edit],[data-novo],[data-fc],[data-rate],[data-con],[data-puxar]');
   if (!t) return;
-  if (t.dataset.tab) ir(t.dataset.tab);
+  if (t.hasAttribute('data-rate')) { const n = semNota()[0]; if (n) abrir(n); }
+  else if (t.dataset.con) conectar(t.dataset.con);
+  else if (t.dataset.puxar) puxarProgramados([t.dataset.puxar]).then(n => toast(`${canal(t.dataset.puxar).nome}: ${n.total} programado${n.total === 1 ? '' : 's'}`));
+  else if (t.dataset.tab) ir(t.dataset.tab);
   else if (t.dataset.goto) ir(t.dataset.goto);
   else if (t.dataset.edit) abrir(dados.agenda.find(a => a.id === t.dataset.edit));
   else if (t.dataset.novo) { const [canal, data] = t.dataset.novo.split('|'); abrir(null, { canal, data }); }
   else if (t.dataset.fc) { fCanal = t.dataset.fc; limV = 30; renderVideos(); }
 });
 $('#fab').onclick = () => abrir(null, { data: aba === 'agenda' && agIni > hoje() ? agIni : hoje() });
-$('#btnRef').onclick = () => { atualizar(true); if (ghOn()) sincronizar(); };
+$('#btnRef').onclick = () => { atualizar(true); puxarProgramados(); if (ghOn()) sincronizar(); };
 ['#fPer', '#fOrd'].forEach(s => $(s).onchange = () => { limV = 30; renderVideos(); });
 $('#fBusca').oninput = () => { limV = 30; renderVideos(); };
 $('#maisV').onclick = () => { limV += 30; renderVideos(); };
@@ -849,6 +1028,7 @@ mostrarAvisos();
 ir('painel');
 if (ghOn()) sincronizar();
 if (cfg.apiKey && (!cache.em || Date.now() - new Date(cache.em) > 30 * 60 * 1000)) atualizar();
+if (clientId()) { carregarGIS().catch(() => {}); puxarProgramados(); }
 </script>
 </body>
 </html>
