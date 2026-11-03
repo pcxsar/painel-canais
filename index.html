@@ -34,7 +34,7 @@ a{color:inherit;text-decoration:none}
 @keyframes gira{to{transform:rotate(360deg)}}
 
 /* ---------- navegação (embaixo no celular) ---------- */
-.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(20,24,33,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(20,24,33,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
 .nav button{height:var(--nav);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--mut);font-size:11px;font-weight:500}
 .nav button b{font-size:20px;line-height:1;font-weight:400}
 .nav button.on{color:var(--acc)}
@@ -194,6 +194,28 @@ ol.passos b{color:var(--txt)}
 .yt-prev img{width:96px;height:54px;object-fit:cover;border-radius:8px;background:var(--card2);flex:none}
 .yt-prev b{display:block;font-size:14px;font-weight:600;line-height:1.3}
 .tag.sn{background:#3a2e14;color:#ffc56b}
+/* ---------- relatório ---------- */
+.rel-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.kg .kpi{padding:10px 12px}
+.kg .kpi.big{grid-column:1/-1;border:1px solid var(--line)}
+.kg .kpi.big .v{font-size:30px}
+.cmp{display:flex;gap:2px 8px;margin-top:3px;flex-wrap:wrap}
+.graf{margin-top:12px}
+.graf h4{font-size:13px;font-weight:600;color:var(--mut);margin-bottom:6px;font-family:Inter,system-ui,sans-serif}
+.graf svg{width:100%;height:84px;display:block;overflow:visible}
+.graf .lg{display:flex;justify-content:space-between;font-size:11px;color:var(--mut2);margin-top:4px}
+.rvs{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.rv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.rv .tt{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rv .pc{font-family:Outfit,Inter,system-ui,sans-serif;font-weight:700;font-size:20px;text-align:right;line-height:1}
+.rv .pc small{display:block;font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:10px;color:var(--mut)}
+.rv .bar{grid-column:1/-1;height:6px;border-radius:3px;background:var(--card2);overflow:hidden}
+.rv .bar i{display:block;height:100%;border-radius:3px}
+.rv .ms{grid-column:1/-1;display:flex;gap:4px 12px;font-size:12px;color:var(--mut);flex-wrap:wrap;align-items:center}
+.rv .ms b{color:var(--txt);font-weight:600}
+.nota.sm{min-width:22px;height:20px;font-size:12px;padding:0 5px;border-radius:6px}
+
 .acoes2{display:flex;gap:8px;margin-top:10px}
 .acoes2 .btn{flex:1}
 .prio,.pubs{grid-template-columns:minmax(0,1fr)}
@@ -223,6 +245,10 @@ ol.passos b{color:var(--txt)}
   .b-prio{margin-bottom:0}
   .cel .cn{width:150px}
   .lista{grid-template-columns:1fr 1fr 1fr}
+  .relw{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+}
+@media (min-width:720px){
+  .kg{grid-template-columns:repeat(3,1fr)}
 }
 </style>
 </head>
@@ -235,6 +261,7 @@ ol.passos b{color:var(--txt)}
       <button data-tab="painel" class="on"><b>◉</b>Painel</button>
       <button data-tab="videos"><b>▶</b>Vídeos</button>
       <button data-tab="agenda"><b>▦</b>Agenda</button>
+      <button data-tab="relat"><b>▤</b>Relatório</button>
       <button data-tab="config"><b>⚙</b>Ajustes</button>
     </nav>
     <div class="upd" id="upd"></div>
@@ -311,6 +338,13 @@ ol.passos b{color:var(--txt)}
     </div>
   </section>
 
+  <!-- RELATÓRIO -->
+  <section id="tab-relat" class="hide">
+    <h2>Relatório do dia</h2>
+    <div class="segs" id="segRel"></div>
+    <div id="relBody"></div>
+  </section>
+
   <!-- AJUSTES -->
   <section id="tab-config" class="hide">
     <h2>Ajustes</h2>
@@ -333,6 +367,7 @@ ol.passos b{color:var(--txt)}
         <h3>Puxar vídeos programados do YouTube</h3>
         <p class="sub">A chave da API só enxerga vídeos públicos. Para o painel ver os programados, você entra com a conta do canal (só leitura, ele não altera nada).</p>
         <ol class="passos">
+          <li>Em <b>APIs e serviços → Biblioteca</b>, ative também a <b>YouTube Analytics API</b> (é ela que dá a % assistida e os números por dia).</li>
           <li>No mesmo projeto do <b>Google Cloud</b>, abra <b>Google Auth Platform</b> (ou "Tela de consentimento OAuth"), escolha <b>Externo</b> e, em <b>Público-alvo → Usuários de teste</b>, adicione o seu e-mail.</li>
           <li>Em <b>Clientes</b> (ou Credenciais) → <b>Criar cliente</b> → <b>Aplicativo da Web</b>. Em <b>Origens JavaScript autorizadas</b>, coloque <b>https://pcxsar.github.io</b>.</li>
           <li>Copie o <b>ID do cliente</b> (termina em .apps.googleusercontent.com) e cole aqui.</li>
@@ -542,7 +577,7 @@ function conectar(handle) {
   if (!window.google?.accounts?.oauth2) { carregarGIS().catch(e => toast(e.message)); toast('Carregando o login do Google, toque de novo'); return; }
   const tc = google.accounts.oauth2.initTokenClient({
     client_id: clientId(),
-    scope: 'https://www.googleapis.com/auth/youtube.readonly',
+    scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly',
     callback: async r => {
       if (r.error) { toast('Login cancelado'); return; }
       try {
@@ -555,6 +590,8 @@ function conectar(handle) {
         gravar(LS_T, toks);
         if (alvo.handle !== handle) toast(`Você entrou com ${alvo.nome}`);
         const n = await puxarProgramados([alvo.handle]);
+        relCanal = alvo.handle;
+        puxarRelatorio(alvo.handle).then(render);
         toast(`${alvo.nome}: ${n.total} programado${n.total === 1 ? '' : 's'}${n.novos ? `, ${n.novos} novo${n.novos === 1 ? '' : 's'}` : ''}`);
       } catch (e) { toast('Erro: ' + e.message); }
     },
@@ -626,6 +663,139 @@ function renderYtBar() {
     ? `<button class="chip ok" data-puxar="${c.handle}" title="Puxar de novo"><span class="dot" style="background:${c.cor}"></span>${esc(c.nome)} ✓</button>`
     : `<button class="chip" data-con="${c.handle}"><span class="dot" style="background:${c.cor}"></span>Conectar ${esc(c.nome)}</button>`).join('')}</div>`;
   $('#ytBar').innerHTML = h + bannerSemNota(semNota().length);
+}
+
+/* ---------------- relatório (YouTube Analytics) ---------------- */
+const LS_R = 'painelCanais.rel';
+let rels = ler(LS_R, {});
+let relCanal = CANAIS[0].handle, relModo = 'dia';
+const puxandoRel = {};
+const MET = 'views,likes,comments,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,subscribersGained,subscribersLost';
+const MET_V = 'views,likes,comments,averageViewDuration,averageViewPercentage';
+async function ytA(tok, params) {
+  const u = new URL('https://youtubeanalytics.googleapis.com/v2/reports');
+  Object.entries({ ids: 'channel==MINE', ...params }).forEach(([k, v]) => u.searchParams.set(k, v));
+  const r = await fetch(u, { headers: { Authorization: 'Bearer ' + tok } });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(j.error?.message || 'Erro ' + r.status); e.status = r.status; throw e; }
+  return (j.rows || []).map(row => Object.fromEntries((j.columnHeaders || []).map((h, i) => [h.name, row[i]])));
+}
+async function puxarRelatorio(h) {
+  if (!tokOk(h) || puxandoRel[h]) return;
+  puxandoRel[h] = true; if (aba === 'relat') renderRelat();
+  const t = toks[h].t, fim = hoje();
+  try {
+    const dias = (await ytA(t, { startDate: addD(fim, -40), endDate: fim, metrics: MET, dimensions: 'day', sort: 'day' }))
+      .map(r => ({ ...r, subs: (r.subscribersGained || 0) - (r.subscribersLost || 0) }));
+    const comDado = dias.filter(r => r.views || r.estimatedMinutesWatched || r.likes);
+    const dia = (comDado[comDado.length - 1] || dias[dias.length - 1])?.day || null;
+    let vd = [], v28 = [];
+    if (dia) {
+      vd = await ytA(t, { startDate: dia, endDate: dia, metrics: MET_V, dimensions: 'video', sort: '-views', maxResults: 50 });
+      v28 = await ytA(t, { startDate: addD(dia, -27), endDate: dia, metrics: MET_V, dimensions: 'video', sort: '-views', maxResults: 50 });
+    }
+    const tit = { ...(rels[h]?.tit || {}) };
+    base().videos.forEach(v => { tit[v.id] = v.titulo; });
+    dados.agenda.forEach(a => { const id = idDoLink(a.video); if (id) tit[id] = tit[id] || a.titulo; });
+    const faltam = [...new Set([...vd, ...v28].map(r => r.video))].filter(id => !tit[id]);
+    for (let i = 0; i < faltam.length; i += 50) {
+      const v = await ytAuth(t, 'videos', { part: 'snippet', id: faltam.slice(i, i + 50).join(','), maxResults: 50 });
+      (v.items || []).forEach(x => { tit[x.id] = x.snippet.title; });
+    }
+    rels[h] = { em: new Date().toISOString(), dias, dia, vd, v28, tit };
+  } catch (e) {
+    if (e.status === 401) { delete toks[h]; gravar(LS_T, toks); }
+    const m = /has not been used|disabled/i.test(e.message) ? 'ative a YouTube Analytics API no Google Cloud (Ajustes, passo 1)'
+      : e.status === 403 ? 'sem permissão para os dados de Analytics. Desconecte e conecte o canal de novo.' : e.message;
+    rels[h] = { ...(rels[h] || {}), erro: m };
+  }
+  gravar(LS_R, rels);
+  puxandoRel[h] = false;
+  if (aba === 'relat') renderRelat();
+}
+const segF = s => { s = Math.round(s || 0); return `${Math.floor(s / 60)}:${pad(s % 60)}`; };
+const pctF = p => (p == null ? '—' : (+p).toFixed(1).replace('.', ',') + '%');
+const pctCor = p => p >= 90 ? 'var(--grn)' : p >= 70 ? 'var(--amb)' : 'var(--red)';
+const PESO = { averageViewPercentage: 1, averageViewDuration: 1 };
+function mediaDias(rows, k) {
+  if (!rows.length) return null;
+  if (PESO[k]) { const tv = rows.reduce((s, r) => s + (r.views || 0), 0); return tv ? rows.reduce((s, r) => s + (r[k] || 0) * (r.views || 0), 0) / tv : null; }
+  return rows.reduce((s, r) => s + (r[k] || 0), 0) / rows.length;
+}
+function compara(a, b, lbl, pp) {
+  if (b == null || a == null) return `<span class="d zr">${lbl}: —</span>`;
+  if (pp) { const d = a - b; return `<span class="d ${dCls(d)}">${d > 0 ? '+' : ''}${d.toFixed(1).replace('.', ',')} p.p. ${lbl}</span>`; }
+  if (!b) return `<span class="d zr">${lbl}: —</span>`;
+  const p = (a - b) / Math.abs(b) * 100;
+  return `<span class="d ${dCls(p)}">${p > 0 ? '+' : ''}${p.toFixed(0)}% ${lbl}</span>`;
+}
+function barras(vals, cor) {
+  const W = 300, H = 80, n = vals.length, mx = Math.max(1, ...vals), bw = W / n;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${vals.map((v, i) => { const h = Math.max(1, v / mx * (H - 4)); return `<rect x="${(i * bw + bw * .15).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw * .7).toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" fill="${i === n - 1 ? 'var(--acc)' : cor}" opacity="${i === n - 1 ? 1 : .55}"/>`; }).join('')}</svg>`;
+}
+function linhaPct(vals) {
+  const W = 300, H = 80, ok = vals.filter(v => v != null);
+  if (ok.length < 2) return '<div class="sub" style="font-size:12px">Poucos dias com dados ainda.</div>';
+  const mn = Math.min(...ok) - 5, mx = Math.max(...ok) + 5, n = vals.length;
+  const pts = vals.map((v, i) => v == null ? null : [i / (n - 1) * W, H - 4 - (v - mn) / (mx - mn) * (H - 8)]);
+  const d = pts.filter(Boolean).map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const last = pts[pts.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="var(--grn)" stroke-width="2" vector-effect="non-scaling-stroke"/>${last ? `<circle cx="${last[0]}" cy="${last[1]}" r="3" fill="var(--acc)" vector-effect="non-scaling-stroke"/>` : ''}</svg>`;
+}
+function renderRelat() {
+  $('#segRel').innerHTML = CANAIS.map(c => `<button data-rc="${c.handle}" class="${relCanal === c.handle ? 'on' : ''}"><span class="dot" style="background:${c.cor};margin-right:6px"></span>${esc(c.nome)}</button>`).join('');
+  const h = relCanal, c = canal(h), r = rels[h];
+  let top = '';
+  if (!clientId()) top = `<div class="aviso">O relatório usa o login do canal. <button data-goto="config">Configurar em Ajustes</button></div>`;
+  else if (puxandoRel[h]) top = `<div class="rel-top"><span class="sub">Buscando os números de ${esc(c.nome)}…</span></div>`;
+  else if (tokOk(h)) top = `<div class="rel-top"><span class="chip ok"><span class="dot" style="background:${c.cor}"></span>Conectado</span><button class="chip" data-relpuxar="${h}">↻ Atualizar relatório</button>${r?.em ? `<span class="sub" style="font-size:12px">buscado ${new Date(r.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>` : ''}</div>`;
+  else top = `<div class="rel-top"><button class="chip" data-con="${h}"><span class="dot" style="background:${c.cor}"></span>Conectar ${esc(c.nome)}</button>${r?.em ? `<span class="sub" style="font-size:12px">mostrando o último relatório, de ${new Date(r.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>` : ''}</div>`;
+  if (r?.erro && !puxandoRel[h]) top += `<div class="aviso erro">${esc(r.erro)}</div>`;
+  if (!r?.dias) { $('#relBody').innerHTML = top + (clientId() ? `<div class="sub">Conecte o canal para gerar o relatório.</div>` : ''); return; }
+  if (!r.dia) { $('#relBody').innerHTML = top + `<div class="sub">Ainda não há dados de Analytics para este canal.</div>`; return; }
+
+  const dias = r.dias, i = dias.findIndex(x => x.day === r.dia), d = dias[i], ontem = dias[i - 1];
+  const sete = dias.slice(Math.max(0, i - 7), i);
+  const K = [
+    { k: 'averageViewPercentage', l: '% média assistida', f: pctF, pp: true, big: true },
+    { k: 'views', l: 'Views', f: fmt },
+    { k: 'likes', l: 'Curtidas', f: fmt },
+    { k: 'comments', l: 'Comentários', f: fmt },
+    { k: 'subs', l: 'Inscritos', f: v => (v > 0 ? '+' : '') + fmt(v) },
+    { k: 'averageViewDuration', l: 'Duração média', f: segF },
+    { k: 'estimatedMinutesWatched', l: 'Minutos assistidos', f: fmt },
+  ];
+  const kpis = K.map(o => {
+    const v = d[o.k], vo = ontem?.[o.k], vm = mediaDias(sete, o.k);
+    const cor = o.k === 'averageViewPercentage' && d.views ? `style="color:${pctCor(v)}"` : '';
+    return `<div class="kpi ${o.big ? 'big' : ''}"><div class="l">${o.l}</div><div class="v" ${cor}>${o.k === 'averageViewPercentage' && !d.views ? '—' : o.f(v)}</div><div class="cmp">${compara(v, vo, 'vs dia anterior', o.pp)}${compara(v, vm, 'vs média 7 dias', o.pp)}</div></div>`;
+  }).join('');
+  const ult28 = dias.slice(Math.max(0, i - 27), i + 1);
+  const graf = `<div class="graf"><h4>Views por dia</h4>${barras(ult28.map(x => x.views || 0), c.cor)}<div class="lg"><span>${dm(ult28[0].day)}</span><span>${dm(r.dia)}</span></div></div>
+    <div class="graf"><h4>% média assistida por dia</h4>${linhaPct(ult28.map(x => x.views ? x.averageViewPercentage : null))}<div class="lg"><span>${dm(ult28[0].day)}</span><span>${dm(r.dia)}</span></div></div>`;
+  const lista = (relModo === 'dia' ? r.vd : r.v28) || [];
+  const vids = lista.length ? lista.map(v => {
+    const ag = vivos().find(a => idDoLink(a.video) === v.video);
+    const p = v.averageViewPercentage || 0;
+    return `<a class="rv" href="https://studio.youtube.com/video/${esc(v.video)}/analytics/tab-overview/period-default" target="_blank" rel="noopener">
+      <div class="tt">${esc(r.tit?.[v.video] || v.video)}</div>
+      <div class="pc" style="color:${pctCor(p)}">${pctF(p)}<small>assistido</small></div>
+      <div class="bar"><i style="width:${Math.min(100, p / 1.5)}%;background:${pctCor(p)}"></i></div>
+      <div class="ms">${ag?.nota ? `<span style="display:inline-flex;gap:4px;align-items:center">nota <span class="nota sm ${notaCls(ag.nota)}">${ag.nota}</span></span>` : ''}<span><b>${fmt(v.views)}</b> views</span><span><b>${segF(v.averageViewDuration)}</b> média</span><span><b>${fmt(v.likes)}</b> curtidas</span><span><b>${fmt(v.comments)}</b> coment.</span></div>
+    </a>`;
+  }).join('') : `<div class="sub">Nenhum vídeo com views nesse período.</div>`;
+
+  $('#relBody').innerHTML = top + `
+    <p class="sub" style="margin-bottom:10px">Dia <b style="color:var(--txt)">${diaCurto(r.dia)}</b>, o último que o YouTube já fechou. Comparado com o dia anterior e com a média dos 7 dias antes dele.</p>
+    <div class="relw"><div>
+      <div class="kg">${kpis}</div>
+      ${graf}
+    </div><div>
+      <div class="ttl"><h3>Vídeos</h3></div>
+      <div class="segs"><button data-rm="dia" class="${relModo === 'dia' ? 'on' : ''}">No dia</button><button data-rm="28" class="${relModo === '28' ? 'on' : ''}">Últimos 28 dias</button></div>
+      <div class="rvs">${vids}</div>
+      <p class="sub" style="font-size:11px;margin-top:12px">Em Shorts a % assistida passa de 100% quando as pessoas assistem mais de uma vez. Cores: verde a partir de 90%, amarelo de 70% a 90%, vermelho abaixo de 70%.</p>
+    </div></div>`;
 }
 
 let atualizando = false;
@@ -838,11 +1008,12 @@ function render() {
   if (aba === 'painel') { $('#semNota').innerHTML = bannerSemNota(semNota().length); renderPainel(); }
   if (aba === 'videos') renderVideos();
   if (aba === 'agenda') { renderYtBar(); renderAgenda(); }
+  if (aba === 'relat') renderRelat();
 }
 function ir(t) {
   aba = t;
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
-  ['painel', 'videos', 'agenda', 'config'].forEach(x => $('#tab-' + x).classList.toggle('hide', x !== t));
+  ['painel', 'videos', 'agenda', 'relat', 'config'].forEach(x => $('#tab-' + x).classList.toggle('hide', x !== t));
   $('#fab').classList.toggle('hide', !(t === 'agenda' || t === 'painel'));
   if (t === 'config') preencherCfg();
   render(); window.scrollTo(0, 0);
@@ -983,7 +1154,7 @@ $('#cCidSalvar').onclick = () => {
 };
 $('#cDescon').onclick = () => {
   Object.values(toks).forEach(t => { try { google.accounts.oauth2.revoke(t.t); } catch {} });
-  toks = {}; gravar(LS_T, toks);
+  toks = {}; gravar(LS_T, toks); render();
   $('#cCidMsg').innerHTML = '<div class="sub" style="margin-top:8px">Canais desconectados neste navegador.</div>';
 };
 $('#cLim').onchange = e => { cfg.limite = +e.target.value; gravar(LS_CFG, cfg); };
@@ -1002,9 +1173,12 @@ $('#cImpF').onchange = async e => {
 
 /* ---------------- eventos gerais ---------------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-tab],[data-goto],[data-edit],[data-novo],[data-fc],[data-rate],[data-con],[data-puxar]');
+  const t = e.target.closest('[data-tab],[data-goto],[data-edit],[data-novo],[data-fc],[data-rate],[data-con],[data-puxar],[data-rc],[data-rm],[data-relpuxar]');
   if (!t) return;
-  if (t.hasAttribute('data-rate')) { const n = semNota()[0]; if (n) abrir(n); }
+  if (t.dataset.rc) { relCanal = t.dataset.rc; renderRelat(); if (tokOk(relCanal) && !rels[relCanal]?.dias) puxarRelatorio(relCanal); }
+  else if (t.dataset.rm) { relModo = t.dataset.rm; renderRelat(); }
+  else if (t.dataset.relpuxar) puxarRelatorio(t.dataset.relpuxar);
+  else if (t.hasAttribute('data-rate')) { const n = semNota()[0]; if (n) abrir(n); }
   else if (t.dataset.con) conectar(t.dataset.con);
   else if (t.dataset.puxar) puxarProgramados([t.dataset.puxar]).then(n => toast(`${canal(t.dataset.puxar).nome}: ${n.total} programado${n.total === 1 ? '' : 's'}`));
   else if (t.dataset.tab) ir(t.dataset.tab);
@@ -1014,7 +1188,7 @@ document.addEventListener('click', e => {
   else if (t.dataset.fc) { fCanal = t.dataset.fc; limV = 30; renderVideos(); }
 });
 $('#fab').onclick = () => abrir(null, { data: aba === 'agenda' && agIni > hoje() ? agIni : hoje() });
-$('#btnRef').onclick = () => { atualizar(true); puxarProgramados(); if (ghOn()) sincronizar(); };
+$('#btnRef').onclick = () => { atualizar(true); puxarProgramados(); CANAIS.forEach(c => puxarRelatorio(c.handle)); if (ghOn()) sincronizar(); };
 ['#fPer', '#fOrd'].forEach(s => $(s).onchange = () => { limV = 30; renderVideos(); });
 $('#fBusca').oninput = () => { limV = 30; renderVideos(); };
 $('#maisV').onclick = () => { limV += 30; renderVideos(); };
@@ -1028,7 +1202,10 @@ mostrarAvisos();
 ir('painel');
 if (ghOn()) sincronizar();
 if (cfg.apiKey && (!cache.em || Date.now() - new Date(cache.em) > 30 * 60 * 1000)) atualizar();
-if (clientId()) { carregarGIS().catch(() => {}); puxarProgramados(); }
+if (clientId()) {
+  carregarGIS().catch(() => {}); puxarProgramados();
+  CANAIS.forEach(c => { const r = rels[c.handle]; if (!r?.em || Date.now() - new Date(r.em) > 30 * 60 * 1000) puxarRelatorio(c.handle); });
+}
 </script>
 </body>
 </html>
