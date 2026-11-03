@@ -86,7 +86,9 @@ section > h2{font-size:20px;margin:6px 0 12px}
 .d.up{color:var(--grn)}.d.dn{color:var(--red)}.d.zr{color:var(--mut2)}
 .spark{margin-top:10px;height:44px;width:100%}
 .spark-v{font-size:11px;color:var(--mut2);margin-top:8px}
-.top3{margin-top:12px;display:grid;gap:6px}
+.top3{margin-top:12px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.ch{min-width:0}
+.vz{text-align:left}
 .top3 a{display:flex;gap:8px;align-items:center;font-size:13px}
 .top3 a span:first-child{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .top3 a b{font-family:Outfit,Inter,system-ui,sans-serif;font-weight:600}
@@ -446,7 +448,10 @@ async function buscarCanal(c) {
   const uploads = it.contentDetails.relatedPlaylists.uploads;
   const ids = []; let tok;
   for (let p = 0; p < 10; p++) {
-    const pl = await yt('playlistItems', { part: 'contentDetails', playlistId: uploads, maxResults: 50, pageToken: tok });
+    let pl;
+    try { pl = await yt('playlistItems', { part: 'contentDetails', playlistId: uploads, maxResults: 50, pageToken: tok }); }
+    catch (e) { if (/playlistId|cannot be found|not found/i.test(e.message)) break; throw e; } // canal sem vídeos ainda
+    if (!pl.items) break;
     pl.items.forEach(i => ids.push(i.contentDetails.videoId));
     tok = pl.nextPageToken; if (!tok) break;
   }
@@ -461,9 +466,11 @@ async function buscarCanal(c) {
     }));
   }
   const s = it.statistics;
+  // o total do canal no YouTube atrasa; usa a soma dos vídeos quando ela for maior
+  const somaV = vids.reduce((t, v) => t + v.v, 0);
   return {
     info: { handle: c.handle, id: it.id, nome: it.snippet.title, foto: it.snippet.thumbnails?.default?.url,
-      subs: s.hiddenSubscriberCount ? null : +s.subscriberCount, views: +s.viewCount, n: +s.videoCount },
+      subs: s.hiddenSubscriberCount ? null : +s.subscriberCount || 0, views: Math.max(+s.viewCount || 0, somaV), n: Math.max(+s.videoCount || 0, vids.length) },
     vids,
   };
 }
@@ -582,7 +589,7 @@ function renderPainel() {
       <div class="kpis">
         <div class="kpi"><div class="l">Inscritos</div><div class="v">${fmt(i.subs)}</div>${dS != null ? `<div class="d ${dCls(dS)}">${fmtD(dS)} ${kAnt ? 'desde ' + dm(kAnt) : ''}</div>` : ''}</div>
         <div class="kpi"><div class="l">Views totais</div><div class="v">${fmt(i.views)}</div>${dV != null ? `<div class="d ${dCls(dV)}">${fmtD(dV)} ${kAnt ? 'desde ' + dm(kAnt) : ''}</div>` : ''}</div>
-        <div class="kpi"><div class="l">Média últ. 10</div><div class="v">${fmt(media)}</div><div class="d zr">${i.n ?? vs.length} vídeos</div></div>
+        <div class="kpi"><div class="l">Média últ. 10</div><div class="v">${fmt(media)}</div><div class="d zr">${i.n ?? vs.length} ${(i.n ?? vs.length) === 1 ? 'vídeo' : 'vídeos'}</div></div>
       </div>
       ${s7 ? `<div class="sub" style="margin-top:8px;font-size:12px">Últimos 7 dias: <b style="color:var(--txt)">${fmtD(i.views - s7.v)}</b> views${i.subs != null ? `, <b style="color:var(--txt)">${fmtD(i.subs - s7.s)}</b> inscritos` : ''}</div>` : ''}
       <div style="color:${c.cor}">${spark(c.handle)}</div>
