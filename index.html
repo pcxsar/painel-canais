@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0f14">
+<title>Painel dos Canais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14; --bg2:#141821; --card:#181d28; --card2:#1f2533; --line:#2a3142;
+  --txt:#eef1f7; --mut:#8d96ab; --mut2:#5f6880;
+  --acc:#ffd23f; --red:#ff5d5d; --amb:#ffb547; --grn:#4ad99a; --blu:#5aa9ff;
+  --r:14px; --nav:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--txt);font:15px/1.45 Inter,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 16px)}
+h1,h2,h3{font-family:Outfit,Inter,sans-serif;font-weight:600;letter-spacing:-.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:inherit;text-decoration:none}
+.hide{display:none!important}
+
+/* ---------- topo ---------- */
+.top{position:sticky;top:0;z-index:20;background:rgba(13,15,20,.97);border-bottom:1px solid var(--line);padding:12px 16px calc(10px);padding-top:calc(12px + env(safe-area-inset-top))}
+.top-in{display:flex;align-items:center;gap:10px;max-width:1200px;margin:0 auto}
+.logo{font-family:Outfit,Inter,system-ui,sans-serif;font-weight:700;font-size:18px;flex:1;display:flex;align-items:center;gap:8px}
+.logo i{width:10px;height:10px;border-radius:3px;background:var(--acc);display:inline-block;transform:rotate(45deg)}
+.upd{font-size:11px;color:var(--mut);text-align:right;line-height:1.2}
+.btn-ref{width:40px;height:40px;border-radius:12px;background:var(--card2);display:grid;place-items:center;font-size:18px}
+.btn-ref.rodando span{animation:gira 1s linear infinite;display:inline-block}
+@keyframes gira{to{transform:rotate(360deg)}}
+
+/* ---------- navegação (embaixo no celular) ---------- */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(20,24,33,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.nav button{height:var(--nav);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--mut);font-size:11px;font-weight:500}
+.nav button b{font-size:20px;line-height:1;font-weight:400}
+.nav button.on{color:var(--acc)}
+
+main{max-width:1200px;margin:0 auto;padding:16px 16px 84px}
+section > h2{font-size:20px;margin:6px 0 12px}
+.sub{color:var(--mut);font-size:13px}
+.aviso{background:#2a2412;border:1px solid #5c4a14;color:#ffe08a;border-radius:var(--r);padding:12px 14px;font-size:13px;margin-bottom:14px}
+.aviso button{text-decoration:underline;color:var(--acc);font-weight:600}
+.erro{background:#2b1518;border-color:#6b2730;color:#ffb3b3}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.stack{display:grid;gap:12px}
+.ttl{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:22px 0 10px}
+.ttl h3{font-size:16px}
+.link{color:var(--acc);font-size:13px;font-weight:600}
+
+/* chips de canal */
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.cn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);font-weight:500}
+
+/* nota */
+.nota{min-width:30px;height:26px;padding:0 7px;border-radius:8px;display:inline-grid;place-items:center;font-family:Outfit,Inter,system-ui,sans-serif;font-weight:700;font-size:14px;flex:none}
+.n-b{background:#3a1c20;color:#ff8a8a}.n-m{background:#3a2e14;color:#ffc56b}.n-a{background:#16352a;color:#6fe8b0}.n-x{background:#12402e;color:#8dffc9}.n-0{background:var(--card2);color:var(--mut)}
+
+/* ---------- painel ---------- */
+.hoje{display:grid;gap:10px}
+.hoje-canal{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c)}
+.hoje-canal .nm{font-size:12px;color:var(--mut);margin-bottom:4px;font-weight:500}
+.hoje-canal .vz{color:var(--mut2);font-size:13px;font-style:italic}
+.hoje-canal > div{display:grid;grid-template-columns:minmax(0,1fr)}
+.it{display:flex;gap:8px;align-items:center;margin-top:4px}
+.it .tt{flex:1;min-width:0;font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it .hr{font-size:12px;color:var(--mut)}
+.tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-radius:6px;background:#3a1c20;color:#ff8a8a}
+
+.canais{display:grid;gap:12px}
+.ch{position:relative;overflow:hidden}
+.ch::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--c)}
+.ch-h{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.ch-h img{width:40px;height:40px;border-radius:50%;background:var(--card2)}
+.ch-h .nm{font-family:Outfit,Inter,system-ui,sans-serif;font-weight:600;font-size:16px}
+.ch-h a.sub:hover{color:var(--txt)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:var(--bg2);border-radius:10px;padding:9px 10px}
+.kpi .l{font-size:11px;color:var(--mut)}
+.kpi .v{font-family:Outfit,Inter,system-ui,sans-serif;font-weight:600;font-size:19px;line-height:1.2}
+.d{font-size:11px;font-weight:600}
+.d.up{color:var(--grn)}.d.dn{color:var(--red)}.d.zr{color:var(--mut2)}
+.spark{margin-top:10px;height:44px;width:100%}
+.spark-v{font-size:11px;color:var(--mut2);margin-top:8px}
+.top3{margin-top:12px;display:grid;gap:6px}
+.top3 a{display:flex;gap:8px;align-items:center;font-size:13px}
+.top3 a span:first-child{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.top3 a b{font-family:Outfit,Inter,system-ui,sans-serif;font-weight:600}
+
+/* ---------- vídeos ---------- */
+.filtros{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.filtros input{grid-column:1/-1}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--acc)}
+.segs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none}
+.segs button{flex:none;padding:7px 12px;border-radius:99px;background:var(--card2);color:var(--mut);font-size:13px;font-weight:500;border:1px solid transparent}
+.segs button.on{background:#2e2a17;color:var(--acc);border-color:#5c4a14}
+.resumo{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.vid{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:10px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.vid img{width:96px;height:54px;object-fit:cover;border-radius:8px;background:var(--card2)}
+.vid .tt{font-size:14px;font-weight:500;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vid .meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin-top:4px}
+.vid .nums{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;border-top:1px solid var(--line);padding-top:8px}
+.vid .nums div{font-size:11px;color:var(--mut)}
+.vid .nums b{display:block;font-family:Outfit,Inter,system-ui,sans-serif;font-weight:600;font-size:16px;color:var(--txt)}
+.lista{display:grid;gap:8px}
+.mais{width:100%;padding:12px;margin-top:10px;border-radius:12px;background:var(--card2);color:var(--mut);font-weight:600}
+
+/* ---------- agenda ---------- */
+.ag-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.ag-bar .per{flex:1;text-align:center;font-weight:600;font-size:14px}
+.ic{width:40px;height:40px;border-radius:12px;background:var(--card2);font-size:18px;display:grid;place-items:center}
+.btn{padding:11px 16px;border-radius:12px;background:var(--acc);color:#1a1500;font-weight:700}
+.btn.sec{background:var(--card2);color:var(--txt)}
+.btn.del{background:#3a1c20;color:#ff8a8a}
+.fab{position:fixed;right:16px;bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 14px);z-index:25;height:52px;padding:0 20px;border-radius:16px;background:var(--acc);color:#1a1500;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.45);display:flex;align-items:center;gap:6px}
+.fab b{font-size:22px;font-weight:500}
+
+.agw{display:flex;flex-direction:column}
+.agw .lado{display:contents}
+.b-prio{order:-1;margin-bottom:22px}
+.b-pubs{order:1}
+.prio{display:grid;gap:8px}
+.pr{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.pr.urg{border-color:#6b2730;background:#1f1519}
+.pr .tx{flex:1;min-width:0}
+.pr .tt{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr .why{font-size:12px;color:var(--mut)}
+.pos{font-family:Outfit,Inter,system-ui,sans-serif;font-weight:700;color:var(--mut2);width:16px;text-align:center}
+
+.dias{display:grid;gap:10px}
+.dia{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.dia.hj{border-color:#5c4a14}
+.dia-h{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg2);font-size:13px;font-weight:600;text-transform:capitalize}
+.dia.hj .dia-h{background:#2a2412;color:var(--acc)}
+.dia-h .falta{font-size:11px;font-weight:600;color:var(--amb);text-transform:none}
+.cel{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-top:1px solid var(--line)}
+.cel:first-of-type{border-top:0}
+.cel .cn{width:92px;flex:none;padding-top:4px}
+.cel .its{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.ag-it{display:flex;gap:8px;align-items:center;text-align:left;width:100%;min-width:0;padding:4px 0;border-radius:8px}
+.ag-it:active{background:var(--card2)}
+.ag-it .tt{flex:1;min-width:0;font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ag-it.pub .tt{color:var(--mut);text-decoration:line-through;text-decoration-color:var(--mut2)}
+.vazio{color:var(--mut2);font-size:13px;text-align:left;padding:4px 0}
+.vazio:hover{color:var(--acc)}
+
+.pubs{display:grid;gap:8px}
+.pb{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.pb .tt{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb .vw{text-align:right;font-family:Outfit,Inter,system-ui,sans-serif;font-weight:600}
+.pb .vw small{display:block;font-family:Inter;font-weight:400;font-size:11px;color:var(--mut)}
+
+/* ---------- dialog ---------- */
+dialog{border:0;padding:0;background:transparent;color:var(--txt);max-width:none;max-height:none;width:100%;height:100%;margin:0}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--bg2);border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.sheet h3{font-size:18px;margin-bottom:14px}
+.f{display:grid;gap:5px;margin-bottom:12px}
+.f label{font-size:12px;color:var(--mut);font-weight:500}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.notas{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.notas button{height:38px;border-radius:9px;background:var(--card2);font-family:Outfit,Inter,system-ui,sans-serif;font-weight:700;color:var(--mut)}
+.notas button.on{outline:2px solid var(--acc)}
+.acoes{display:flex;gap:8px;margin-top:6px}
+.acoes .sp{flex:1}
+
+/* ---------- config ---------- */
+.cfg{display:grid;gap:12px}
+.cfg .card h3{font-size:15px;margin-bottom:4px}
+.cfg .card p{margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.ok{color:var(--grn);font-size:13px;margin-top:8px}
+.ko{color:var(--red);font-size:13px;margin-top:8px}
+ol.passos{padding-left:18px;color:var(--mut);font-size:13px;display:grid;gap:4px;margin:8px 0 10px}
+ol.passos b{color:var(--txt)}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 80px);transform:translateX(-50%) translateY(20px);opacity:0;background:var(--txt);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;transition:.25s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- telas maiores ---------- */
+@media (min-width:720px){
+  .hoje{grid-template-columns:repeat(3,1fr)}
+  .canais{grid-template-columns:repeat(3,1fr)}
+  .filtros{grid-template-columns:2fr 1fr 1fr}
+  .filtros input{grid-column:auto}
+  .resumo{grid-template-columns:repeat(4,1fr)}
+  .lista{grid-template-columns:1fr 1fr}
+  .sheet{left:50%;right:auto;bottom:auto;top:50%;transform:translate(-50%,-50%);width:520px;border-radius:20px;border:1px solid var(--line)}
+  .cfg{grid-template-columns:1fr 1fr}
+}
+@media (min-width:1000px){
+  body{padding-bottom:30px}
+  .top{background:rgba(13,15,20,.9);backdrop-filter:blur(10px)}
+  .nav{position:static;display:flex;background:none;border:0;gap:4px;backdrop-filter:none}
+  .nav button{height:38px;flex-direction:row;padding:0 14px;border-radius:10px;font-size:14px;gap:6px}
+  .nav button b{font-size:15px}
+  .nav button.on{background:#2e2a17}
+  .fab{bottom:24px;right:24px}
+  .toast{bottom:30px}
+  .agw{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+  .agw .lado{display:block;position:sticky;top:84px}
+  .b-prio{margin-bottom:0}
+  .cel .cn{width:150px}
+  .lista{grid-template-columns:1fr 1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="logo"><i></i>Painel dos Canais</div>
+    <nav class="nav" id="nav">
+      <button data-tab="painel" class="on"><b>◉</b>Painel</button>
+      <button data-tab="videos"><b>▶</b>Vídeos</button>
+      <button data-tab="agenda"><b>▦</b>Agenda</button>
+      <button data-tab="config"><b>⚙</b>Ajustes</button>
+    </nav>
+    <div class="upd" id="upd"></div>
+    <button class="btn-ref" id="btnRef" title="Atualizar números"><span>↻</span></button>
+  </div>
+</header>
+
+<main>
+  <div id="avisos"></div>
+
+  <!-- PAINEL -->
+  <section id="tab-painel">
+    <div class="ttl" style="margin-top:4px"><h3>Hoje vai ao ar</h3><button class="link" data-goto="agenda">Agenda →</button></div>
+    <div class="hoje" id="hoje"></div>
+    <div class="ttl"><h3>Amanhã</h3></div>
+    <div class="hoje" id="amanha"></div>
+    <div class="ttl"><h3>Canais</h3><button class="link" data-goto="videos">Todos os vídeos →</button></div>
+    <div class="canais" id="canais"></div>
+  </section>
+
+  <!-- VÍDEOS -->
+  <section id="tab-videos" class="hide">
+    <h2>Vídeos</h2>
+    <div class="segs" id="segCanal"></div>
+    <div class="filtros">
+      <input id="fBusca" type="search" placeholder="Buscar pelo título">
+      <select id="fPer">
+        <option value="7">Últimos 7 dias</option>
+        <option value="30" selected>Últimos 30 dias</option>
+        <option value="90">Últimos 90 dias</option>
+        <option value="0">Todo o período</option>
+      </select>
+      <select id="fOrd">
+        <option value="data">Mais recentes</option>
+        <option value="v">Mais vistos</option>
+        <option value="dv">Mais cresceram</option>
+        <option value="l">Mais curtidos</option>
+        <option value="c">Mais comentados</option>
+        <option value="eng">Maior engajamento</option>
+      </select>
+    </div>
+    <div class="resumo" id="resumoV"></div>
+    <div class="lista" id="listaV"></div>
+    <button class="mais hide" id="maisV">Mostrar mais</button>
+  </section>
+
+  <!-- AGENDA -->
+  <section id="tab-agenda" class="hide">
+    <h2>Agenda</h2>
+    <div class="agw">
+      <div>
+        <div class="ag-bar">
+          <button class="ic" id="agPrev">‹</button>
+          <div class="per" id="agPer"></div>
+          <button class="ic" id="agNext">›</button>
+          <button class="ic" id="agHoje" title="Voltar para hoje" style="font-size:13px;width:auto;padding:0 12px">Hoje</button>
+        </div>
+        <div class="dias" id="dias"></div>
+      </div>
+      <div class="lado">
+        <div class="b-prio">
+          <div class="ttl" style="margin-top:0"><h3>Prioridade de substituição</h3></div>
+          <p class="sub" style="margin:-4px 0 10px">Notas baixas que vão ao ar primeiro aparecem no topo.</p>
+          <div class="prio" id="prio"></div>
+        </div>
+        <div class="b-pubs">
+          <div class="ttl"><h3>Nota × desempenho</h3></div>
+          <p class="sub" style="margin:-4px 0 10px">Vídeos da agenda que já foram ao ar.</p>
+          <div class="pubs" id="pubs"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section id="tab-config" class="hide">
+    <h2>Ajustes</h2>
+    <div class="cfg">
+      <div class="card">
+        <h3>Chave da API do YouTube</h3>
+        <p class="sub">Fica salva só neste navegador. Sem ela o painel mostra dados de exemplo.</p>
+        <ol class="passos">
+          <li>Entre em <b>console.cloud.google.com</b> e crie um projeto.</li>
+          <li>Em <b>APIs e serviços → Biblioteca</b>, ative a <b>YouTube Data API v3</b>.</li>
+          <li>Em <b>Credenciais → Criar credenciais → Chave de API</b>.</li>
+          <li>Restrinja a chave: sites <b>https://pcxsar.github.io/*</b> e só a YouTube Data API.</li>
+        </ol>
+        <div class="f"><input id="cApi" type="password" placeholder="Cole a chave aqui (AIza...)" autocomplete="off"></div>
+        <div class="row"><button class="btn" id="cApiSalvar">Salvar e atualizar</button></div>
+        <div id="cApiMsg"></div>
+      </div>
+
+      <div class="card">
+        <h3>Sincronizar a agenda pelo GitHub</h3>
+        <p class="sub">Opcional. Salva a agenda e o histórico num arquivo de um repositório seu, para ver a mesma agenda no celular e no PC. Use um repositório <b>privado</b> para os dados.</p>
+        <ol class="passos">
+          <li>Crie um repositório privado, por exemplo <b>painel-dados</b>.</li>
+          <li>Em <b>GitHub → Settings → Developer settings → Fine-grained tokens</b>, gere um token só para esse repositório, com <b>Contents: Read and write</b>.</li>
+          <li>Preencha abaixo nos dois aparelhos.</li>
+        </ol>
+        <div class="f"><label>Token</label><input id="cTok" type="password" placeholder="github_pat_..." autocomplete="off"></div>
+        <div class="f2">
+          <div class="f"><label>Repositório</label><input id="cRepo" placeholder="pcxsar/painel-dados"></div>
+          <div class="f"><label>Branch</label><input id="cBr" placeholder="main"></div>
+        </div>
+        <div class="f"><label>Arquivo</label><input id="cPath" placeholder="painel.json"></div>
+        <div class="row">
+          <button class="btn" id="cGhSalvar">Salvar e sincronizar</button>
+          <button class="btn sec" id="cGhDesl">Desligar</button>
+        </div>
+        <div id="cGhMsg"></div>
+      </div>
+
+      <div class="card">
+        <h3>Prioridade</h3>
+        <p class="sub">Vídeos com nota igual ou abaixo deste valor, indo ao ar nos próximos 3 dias, ficam marcados como urgentes.</p>
+        <div class="f"><select id="cLim"></select></div>
+      </div>
+
+      <div class="card">
+        <h3>Backup</h3>
+        <p class="sub">Exporte a agenda e o histórico num arquivo .json, ou importe um backup.</p>
+        <div class="row">
+          <button class="btn sec" id="cExp">Exportar</button>
+          <button class="btn sec" id="cImp">Importar</button>
+          <input type="file" id="cImpF" accept=".json,application/json" class="hide">
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="fab hide" id="fab"><b>+</b>Agendar</button>
+
+<dialog id="dlg">
+  <form class="sheet" id="fAg" method="dialog">
+    <h3 id="dlgT">Agendar vídeo</h3>
+    <div class="f"><label>Canal</label><select id="aCanal" required></select></div>
+    <div class="f2">
+      <div class="f"><label>Dia</label><input id="aData" type="date" required></div>
+      <div class="f"><label>Horário</label><input id="aHora" type="time"></div>
+    </div>
+    <div class="f"><label>Título do vídeo</label><input id="aTit" required placeholder="Ex.: O lago que parece de vidro"></div>
+    <div class="f"><label>Nota que você dá para ele</label><div class="notas" id="aNotas"></div></div>
+    <div class="f"><label>Situação</label>
+      <select id="aSt">
+        <option value="agendado">Agendado</option>
+        <option value="substituir">Quero substituir</option>
+        <option value="publicado">Já foi ao ar</option>
+      </select>
+    </div>
+    <div class="f"><label>Anotações</label><textarea id="aObs" rows="2" placeholder="Ex.: gancho fraco, trocar pelo do farol"></textarea></div>
+    <div class="f"><label>Link do vídeo (opcional, para ligar nota e números)</label><input id="aVid" placeholder="youtube.com/shorts/..."></div>
+    <div class="acoes">
+      <button type="button" class="btn del hide" id="aDel">Excluir</button>
+      <span class="sp"></span>
+      <button type="button" class="btn sec" id="aCan">Cancelar</button>
+      <button type="submit" class="btn" id="aOk">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================== CANAIS (edite aqui para adicionar ou trocar) ================== */
+const CANAIS = [
+  { handle: 'AconteceuLaFora', nome: 'Aconteceu Lá Fora', cor: '#ff8a4c' },
+  { handle: 'LorotaGringa',    nome: 'Lorota Gringa',     cor: '#b98bff' },
+  { handle: 'ORenderizado',    nome: 'O Renderizado',     cor: '#3fd6cc' },
+];
+/* =================================================================================== */
+
+const LS_D = 'painelCanais.dados', LS_C = 'painelCanais.cache', LS_CFG = 'painelCanais.cfg';
+const ler = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
+const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.warn(e); } };
+const novoDados = () => ({ agenda: [], excluidos: {}, snaps: { canais: {}, videos: {} } });
+
+let dados = Object.assign(novoDados(), ler(LS_D, {}));
+dados.snaps = Object.assign({ canais: {}, videos: {} }, dados.snaps || {});
+dados.excluidos = dados.excluidos || {};
+let cache = ler(LS_C, { canais: {}, videos: [], em: null });
+let cfg = Object.assign({ apiKey: '', limite: 6, gh: { token: '', repo: '', branch: 'main', path: 'painel.json' } }, ler(LS_CFG, {}));
+let demo = false;
+
+/* ---------------- utilidades ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf = new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 });
+const fmt = n => n == null ? '—' : nf.format(n);
+const fmtD = n => n == null ? '' : (n > 0 ? '+' : '') + nf.format(n);
+const dCls = n => n > 0 ? 'up' : n < 0 ? 'dn' : 'zr';
+const dkey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const pk = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const hoje = () => dkey(new Date());
+const addD = (k, n) => { const d = pk(k); d.setDate(d.getDate() + n); return dkey(d); };
+const difD = (a, b) => Math.round((pk(b) - pk(a)) / 864e5);
+const diaCurto = k => pk(k).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }).replace('.', '');
+const dm = k => pk(k).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+const quando = k => { const n = difD(hoje(), k); return n === 0 ? 'hoje' : n === 1 ? 'amanhã' : n < 0 ? `há ${-n} dia${n < -1 ? 's' : ''}` : `em ${n} dias`; };
+const canal = h => CANAIS.find(c => c.handle === h) || { nome: h, cor: '#888' };
+const notaCls = n => !n ? 'n-0' : n <= 4 ? 'n-b' : n <= 6 ? 'n-m' : n <= 8 ? 'n-a' : 'n-x';
+const notaHtml = n => `<span class="nota ${notaCls(n)}">${n || '–'}</span>`;
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const durS = iso => { const m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso || '') || []; return (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0); };
+const durF = s => s >= 3600 ? `${Math.floor(s / 3600)}h${String(Math.floor(s % 3600 / 60)).padStart(2, '0')}` : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+const idDoLink = s => { s = String(s || '').trim(); if (!s) return ''; const m = s.match(/(?:shorts\/|youtu\.be\/|[?&]v=|embed\/)([\w-]{11})/); if (m) return m[1]; return /^[\w-]{11}$/.test(s) ? s : ''; };
+let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2400); };
+
+/* ---------------- YouTube ---------------- */
+async function yt(path, params) {
+  const u = new URL('https://www.googleapis.com/youtube/v3/' + path);
+  Object.entries({ ...params, key: cfg.apiKey }).forEach(([k, v]) => v != null && u.searchParams.set(k, v));
+  const r = await fetch(u);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error?.message || 'Erro ' + r.status);
+  return j;
+}
+
+async function buscarCanal(c) {
+  const ch = await yt('channels', { part: 'snippet,statistics,contentDetails', forHandle: '@' + c.handle });
+  const it = ch.items?.[0];
+  if (!it) throw new Error('canal @' + c.handle + ' não encontrado');
+  const uploads = it.contentDetails.relatedPlaylists.uploads;
+  const ids = []; let tok;
+  for (let p = 0; p < 10; p++) {
+    const pl = await yt('playlistItems', { part: 'contentDetails', playlistId: uploads, maxResults: 50, pageToken: tok });
+    pl.items.forEach(i => ids.push(i.contentDetails.videoId));
+    tok = pl.nextPageToken; if (!tok) break;
+  }
+  const vids = [];
+  for (let i = 0; i < ids.length; i += 50) {
+    const v = await yt('videos', { part: 'snippet,statistics,contentDetails', id: ids.slice(i, i + 50).join(','), maxResults: 50 });
+    v.items.forEach(x => vids.push({
+      id: x.id, canal: c.handle, titulo: x.snippet.title,
+      pub: x.snippet.publishedAt, thumb: x.snippet.thumbnails?.medium?.url || x.snippet.thumbnails?.default?.url,
+      dur: durS(x.contentDetails.duration),
+      v: +x.statistics.viewCount || 0, l: +x.statistics.likeCount || 0, c: +x.statistics.commentCount || 0,
+    }));
+  }
+  const s = it.statistics;
+  return {
+    info: { handle: c.handle, id: it.id, nome: it.snippet.title, foto: it.snippet.thumbnails?.default?.url,
+      subs: s.hiddenSubscriberCount ? null : +s.subscriberCount, views: +s.viewCount, n: +s.videoCount },
+    vids,
+  };
+}
+
+let atualizando = false;
+async function atualizar(manual) {
+  if (!cfg.apiKey) { if (manual) { toast('Coloque a chave da API em Ajustes'); ir('config'); } return; }
+  if (atualizando) return;
+  atualizando = true; $('#btnRef').classList.add('rodando');
+  const erros = [];
+  const res = await Promise.all(CANAIS.map(c => buscarCanal(c).catch(e => { erros.push(c.nome + ': ' + e.message); return null; })));
+  const ok = res.filter(Boolean);
+  if (ok.length) {
+    const canais = { ...cache.canais }; let videos = cache.videos.filter(v => !ok.some(r => r.info.handle === v.canal));
+    ok.forEach(r => { canais[r.info.handle] = r.info; videos = videos.concat(r.vids); });
+    cache = { canais, videos, em: new Date().toISOString() };
+    gravar(LS_C, cache);
+    registrarSnap();
+    demo = false;
+  }
+  atualizando = false; $('#btnRef').classList.remove('rodando');
+  mostrarAvisos(erros);
+  render();
+  if (ok.length) { salvarDados(); if (manual) toast('Números atualizados'); }
+}
+
+/* histórico diário (para mostrar crescimento) */
+function registrarSnap() {
+  const k = hoje();
+  dados.snaps.canais[k] = dados.snaps.canais[k] || {};
+  Object.values(cache.canais).forEach(c => { dados.snaps.canais[k][c.handle] = { v: c.views, s: c.subs, n: c.n }; });
+  const m = {}; cache.videos.forEach(v => { m[v.id] = [v.v, v.l, v.c]; });
+  dados.snaps.videos[k] = m;
+  const dv = Object.keys(dados.snaps.videos).sort(); while (dv.length > 10) delete dados.snaps.videos[dv.shift()];
+  const dc = Object.keys(dados.snaps.canais).sort(); while (dc.length > 400) delete dados.snaps.canais[dc.shift()];
+}
+const snapAnterior = (obj, antesDe = hoje()) => { const ks = Object.keys(obj).filter(k => k < antesDe).sort(); return ks.length ? ks[ks.length - 1] : null; };
+const snapPorVolta = (obj, k) => { const ks = Object.keys(obj).filter(x => x <= k).sort(); return ks.length ? ks[ks.length - 1] : null; };
+
+/* ---------------- dados de exemplo ---------------- */
+function gerarDemo() {
+  demo = true;
+  const titulos = ['O lago que parece de vidro', 'Ninguém acreditou nesse truque', 'O cara que vendeu a ponte', 'Essa vila não existe no mapa', 'Testaram isso nos EUA', 'A cachorra que dirigia', 'O deserto que fica rosa', 'Inventaram o garfo infinito', 'Ele construiu tudo sozinho', 'A caverna de cristal'];
+  const canais = {}, videos = [];
+  CANAIS.forEach((c, ci) => {
+    canais[c.handle] = { handle: c.handle, nome: c.nome, subs: [4200, 830, 1900][ci], views: [612000, 98000, 240000][ci], n: 14, foto: '' };
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i * 2 - ci);
+      const v = Math.round(Math.random() * 40000 * (ci === 1 ? .3 : 1) + 300);
+      videos.push({ id: 'demo' + ci + i, canal: c.handle, titulo: titulos[(i + ci * 3) % titulos.length], pub: d.toISOString(), thumb: '', dur: 30 + Math.round(Math.random() * 30), v, l: Math.round(v * (.03 + Math.random() * .05)), c: Math.round(v * .003 * Math.random()) });
+    }
+  });
+  return { canais, videos, em: null };
+}
+const base = () => (cache.videos.length || Object.keys(cache.canais).length) ? cache : gerarDemo();
+
+/* ---------------- agenda ---------------- */
+const vivos = () => dados.agenda.filter(a => !a.del);
+function estado(a) {
+  if (a.status === 'publicado') return 'publicado';
+  const h = hoje();
+  if (a.data < h) return 'publicado';
+  if (a.data === h && a.hora) { const n = new Date(); const [hh, mm] = a.hora.split(':').map(Number); if (n.getHours() * 60 + n.getMinutes() >= hh * 60 + mm) return 'publicado'; }
+  return a.status;
+}
+function videoDe(a, vids) {
+  const id = idDoLink(a.video);
+  if (id) return vids.find(v => v.id === id);
+  const t = norm(a.titulo); if (!t) return null;
+  return vids.find(v => v.canal === a.canal && (norm(v.titulo) === t || (t.length > 12 && (norm(v.titulo).includes(t) || t.includes(norm(v.titulo))))));
+}
+const ordAg = (a, b) => (a.data + (a.hora || '99')).localeCompare(b.data + (b.hora || '99'));
+function prioridade() {
+  const h = hoje();
+  return vivos().filter(a => a.data >= h && estado(a) !== 'publicado')
+    .sort((a, b) => ((b.status === 'substituir') - (a.status === 'substituir')) || ((a.nota || 11) - (b.nota || 11)) || ordAg(a, b));
+}
+const urgente = a => estado(a) !== 'publicado' && (a.status === 'substituir' || ((a.nota || 0) <= cfg.limite)) && difD(hoje(), a.data) <= 3;
+
+/* ---------------- render: painel ---------------- */
+function itemHoje(a) {
+  const st = estado(a);
+  return `<button class="it ag-it ${st === 'publicado' ? 'pub' : ''}" data-edit="${a.id}">${notaHtml(a.nota)}<span class="tt">${esc(a.titulo)}</span>${a.hora ? `<span class="hr">${a.hora}</span>` : ''}${st === 'substituir' ? '<span class="tag">trocar</span>' : ''}</button>`;
+}
+function blocoDia(el, k) {
+  const ag = vivos().filter(a => a.data === k).sort(ordAg);
+  el.innerHTML = CANAIS.map(c => {
+    const its = ag.filter(a => a.canal === c.handle);
+    return `<div class="hoje-canal" style="--c:${c.cor}"><div style="flex:1;min-width:0"><div class="nm">${esc(c.nome)}</div>${its.length ? its.map(itemHoje).join('') : `<button class="vz" data-novo="${c.handle}|${k}">Nada agendado · agendar</button>`}</div></div>`;
+  }).join('');
+}
+function spark(handle) {
+  const ks = Object.keys(dados.snaps.canais).sort().slice(-30);
+  const pts = ks.map(k => dados.snaps.canais[k][handle]?.v).filter(v => v != null);
+  if (pts.length < 2) return `<div class="spark-v">O gráfico de crescimento aparece depois de alguns dias de uso.</div>`;
+  const mn = Math.min(...pts), mx = Math.max(...pts), W = 300, H = 44;
+  const xy = pts.map((v, i) => [i / (pts.length - 1) * W, H - 4 - (mx === mn ? .5 : (v - mn) / (mx - mn)) * (H - 8)]);
+  const d = xy.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${d} L${W} ${H} L0 ${H}Z" fill="currentColor" opacity=".12"/><path d="${d}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="spark-v">Views totais · últimos ${pts.length} registros</div>`;
+}
+function renderPainel() {
+  blocoDia($('#hoje'), hoje());
+  blocoDia($('#amanha'), addD(hoje(), 1));
+  const b = base(), sc = dados.snaps.canais;
+  const kAnt = snapAnterior(sc), k7 = snapPorVolta(sc, addD(hoje(), -7));
+  $('#canais').innerHTML = CANAIS.map(c => {
+    const i = b.canais[c.handle] || {};
+    const vs = b.videos.filter(v => v.canal === c.handle).sort((x, y) => y.pub.localeCompare(x.pub));
+    const ult = vs.slice(0, 10), media = ult.length ? Math.round(ult.reduce((s, v) => s + v.v, 0) / ult.length) : null;
+    const ant = kAnt && sc[kAnt][c.handle], s7 = k7 && k7 !== hoje() && sc[k7][c.handle];
+    const dV = ant ? i.views - ant.v : null, dS = ant && i.subs != null ? i.subs - ant.s : null;
+    const top = vs.filter(v => difD(dkey(new Date(v.pub)), hoje()) <= 30).sort((x, y) => y.v - x.v).slice(0, 3);
+    return `<div class="card ch" style="--c:${c.cor}">
+      <div class="ch-h">${i.foto ? `<img src="${esc(i.foto)}" alt="">` : `<span class="dot" style="background:${c.cor};width:40px;height:40px"></span>`}
+        <div><div class="nm">${esc(c.nome)}</div><a class="sub" href="https://www.youtube.com/@${c.handle}" target="_blank" rel="noopener">@${c.handle} ↗</a></div></div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Inscritos</div><div class="v">${fmt(i.subs)}</div>${dS != null ? `<div class="d ${dCls(dS)}">${fmtD(dS)} ${kAnt ? 'desde ' + dm(kAnt) : ''}</div>` : ''}</div>
+        <div class="kpi"><div class="l">Views totais</div><div class="v">${fmt(i.views)}</div>${dV != null ? `<div class="d ${dCls(dV)}">${fmtD(dV)} ${kAnt ? 'desde ' + dm(kAnt) : ''}</div>` : ''}</div>
+        <div class="kpi"><div class="l">Média últ. 10</div><div class="v">${fmt(media)}</div><div class="d zr">${i.n ?? vs.length} vídeos</div></div>
+      </div>
+      ${s7 ? `<div class="sub" style="margin-top:8px;font-size:12px">Últimos 7 dias: <b style="color:var(--txt)">${fmtD(i.views - s7.v)}</b> views${i.subs != null ? `, <b style="color:var(--txt)">${fmtD(i.subs - s7.s)}</b> inscritos` : ''}</div>` : ''}
+      <div style="color:${c.cor}">${spark(c.handle)}</div>
+      ${top.length ? `<div class="top3"><div class="sub" style="font-size:12px">Melhores dos últimos 30 dias</div>${top.map(v => `<a href="https://youtube.com/watch?v=${v.id}" target="_blank" rel="noopener"><span>${esc(v.titulo)}</span><b>${fmt(v.v)}</b></a>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ---------------- render: vídeos ---------------- */
+let fCanal = 'todos', limV = 30;
+function renderVideos() {
+  $('#segCanal').innerHTML = [['todos', 'Todos', '#fff'], ...CANAIS.map(c => [c.handle, c.nome, c.cor])]
+    .map(([h, n, cor]) => `<button data-fc="${h}" class="${fCanal === h ? 'on' : ''}">${h !== 'todos' ? `<span class="dot" style="background:${cor};margin-right:6px"></span>` : ''}${esc(n)}</button>`).join('');
+  const b = base(), per = +$('#fPer').value, busca = norm($('#fBusca').value), ord = $('#fOrd').value;
+  const kAnt = snapAnterior(dados.snaps.videos), ant = kAnt ? dados.snaps.videos[kAnt] : null;
+  const ag = vivos();
+  let vs = b.videos.filter(v => (fCanal === 'todos' || v.canal === fCanal)
+    && (!per || difD(dkey(new Date(v.pub)), hoje()) < per)
+    && (!busca || norm(v.titulo).includes(busca)))
+    .map(v => ({ ...v, dv: ant?.[v.id] ? v.v - ant[v.id][0] : null, eng: v.v ? (v.l + v.c) / v.v * 100 : 0, nota: ag.find(a => videoDe(a, [v]))?.nota }));
+  const sorts = { data: (x, y) => y.pub.localeCompare(x.pub), v: (x, y) => y.v - x.v, dv: (x, y) => (y.dv ?? -1) - (x.dv ?? -1), l: (x, y) => y.l - x.l, c: (x, y) => y.c - x.c, eng: (x, y) => y.eng - x.eng };
+  vs.sort(sorts[ord]);
+  const sum = k => vs.reduce((s, v) => s + (v[k] || 0), 0);
+  const tv = sum('v');
+  $('#resumoV').innerHTML = [
+    ['Vídeos', vs.length], ['Views', fmt(tv)], ['Curtidas', fmt(sum('l'))],
+    [kAnt ? 'Cresceram desde ' + dm(kAnt) : 'Engajamento', kAnt ? fmtD(sum('dv')) : (tv ? ((sum('l') + sum('c')) / tv * 100).toFixed(1).replace('.', ',') + '%' : '—')],
+  ].map(([l, v]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('');
+  $('#listaV').innerHTML = vs.length ? vs.slice(0, limV).map(v => {
+    const c = canal(v.canal);
+    return `<a class="vid" href="${demo ? '#' : 'https://youtube.com/watch?v=' + v.id}" target="_blank" rel="noopener">
+      ${v.thumb ? `<img src="${esc(v.thumb)}" alt="" loading="lazy">` : `<img alt="" style="background:linear-gradient(135deg,${c.cor}55,var(--card2))">`}
+      <div style="min-width:0"><div class="tt">${esc(v.titulo)}</div>
+        <div class="meta"><span class="cn"><span class="dot" style="background:${c.cor}"></span>${esc(c.nome)}</span><span class="sub" style="font-size:12px">${dm(dkey(new Date(v.pub)))} · ${durF(v.dur)}</span>${v.nota ? `<span class="sub" style="font-size:12px;display:inline-flex;gap:4px;align-items:center">nota ${notaHtml(v.nota)}</span>` : ''}</div></div>
+      <div class="nums">
+        <div><b>${fmt(v.v)}</b>views${v.dv != null ? ` <span class="d ${dCls(v.dv)}">${fmtD(v.dv)}</span>` : ''}</div>
+        <div><b>${fmt(v.l)}</b>curtidas</div>
+        <div><b>${fmt(v.c)}</b>coment.</div>
+        <div><b>${v.eng.toFixed(1).replace('.', ',')}%</b>engaj.</div>
+      </div></a>`;
+  }).join('') : `<div class="sub">Nenhum vídeo nesse filtro.</div>`;
+  $('#maisV').classList.toggle('hide', vs.length <= limV);
+}
+
+/* ---------------- render: agenda ---------------- */
+let agIni = hoje(); const AG_DIAS = 14;
+function renderAgenda() {
+  const fim = addD(agIni, AG_DIAS - 1), h = hoje(), ag = vivos();
+  $('#agPer').textContent = `${dm(agIni)} a ${dm(fim)}`;
+  let html = '';
+  for (let i = 0; i < AG_DIAS; i++) {
+    const k = addD(agIni, i), doDia = ag.filter(a => a.data === k).sort(ordAg);
+    const faltam = CANAIS.filter(c => !doDia.some(a => a.canal === c.handle)).length;
+    html += `<div class="dia ${k === h ? 'hj' : ''}"><div class="dia-h"><span>${k === h ? 'Hoje · ' : k === addD(h, 1) ? 'Amanhã · ' : ''}${diaCurto(k)}</span>${k >= h && faltam ? `<span class="falta">${faltam} ${faltam > 1 ? 'canais' : 'canal'} sem vídeo</span>` : ''}</div>`;
+    html += CANAIS.map(c => {
+      const its = doDia.filter(a => a.canal === c.handle);
+      return `<div class="cel"><span class="cn"><span class="dot" style="background:${c.cor}"></span>${esc(c.nome)}</span><div class="its">${its.map(a => {
+        const st = estado(a);
+        return `<button class="ag-it ${st === 'publicado' ? 'pub' : ''}" data-edit="${a.id}">${notaHtml(a.nota)}<span class="tt">${esc(a.titulo)}</span>${a.hora ? `<span class="sub" style="font-size:12px">${a.hora}</span>` : ''}${st === 'substituir' ? '<span class="tag">trocar</span>' : ''}</button>`;
+      }).join('') || (k >= h ? `<button class="vazio" data-novo="${c.handle}|${k}">+ agendar</button>` : `<span class="vazio">—</span>`)}</div></div>`;
+    }).join('');
+    html += `</div>`;
+  }
+  $('#dias').innerHTML = html;
+
+  const pr = prioridade().slice(0, 8);
+  $('#prio').innerHTML = pr.length ? pr.map((a, i) => {
+    const c = canal(a.canal);
+    return `<button class="pr ${urgente(a) ? 'urg' : ''}" data-edit="${a.id}" style="text-align:left;width:100%"><span class="pos">${i + 1}</span>${notaHtml(a.nota)}<div class="tx"><div class="tt">${esc(a.titulo)}</div><div class="why"><span class="dot" style="background:${c.cor};margin-right:5px"></span>${esc(c.nome)} · vai ao ar ${quando(a.data)}${a.hora ? ' às ' + a.hora : ''}${a.status === 'substituir' ? ' · marcado para trocar' : ''}</div></div>${urgente(a) ? '<span class="tag">urgente</span>' : ''}</button>`;
+  }).join('') : `<div class="sub">Nenhum vídeo agendado daqui para frente.</div>`;
+
+  const vids = base().videos;
+  const pubs = ag.filter(a => estado(a) === 'publicado').sort((x, y) => ordAg(y, x)).slice(0, 12);
+  $('#pubs').innerHTML = pubs.length ? pubs.map(a => {
+    const v = videoDe(a, vids), c = canal(a.canal);
+    return `<button class="pb" data-edit="${a.id}" style="text-align:left;width:100%">${notaHtml(a.nota)}<div style="min-width:0"><div class="tt">${esc(a.titulo)}</div><div class="cn"><span class="dot" style="background:${c.cor}"></span>${esc(c.nome)} · ${dm(a.data)}</div></div><div class="vw">${v ? fmt(v.v) + '<small>views</small>' : '<small>sem vínculo</small>'}</div></button>`;
+  }).join('') : `<div class="sub">Quando os vídeos agendados forem ao ar, eles aparecem aqui com os números ao lado da nota.</div>`;
+}
+
+/* ---------------- avisos e topo ---------------- */
+function mostrarAvisos(erros = []) {
+  let h = '';
+  if (!cfg.apiKey) h += `<div class="aviso">Mostrando <b>dados de exemplo</b> nos números. <button data-goto="config">Colocar a chave da API</button> para ver os dados reais dos canais.</div>`;
+  if (erros.length) h += `<div class="aviso erro">Não deu para atualizar: ${erros.map(esc).join(' · ')}</div>`;
+  $('#avisos').innerHTML = h;
+}
+function renderTopo() {
+  $('#upd').innerHTML = cache.em ? `atualizado<br>${new Date(cache.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}` : '';
+}
+let aba = 'painel';
+function render() {
+  renderTopo();
+  if (aba === 'painel') renderPainel();
+  if (aba === 'videos') renderVideos();
+  if (aba === 'agenda') renderAgenda();
+}
+function ir(t) {
+  aba = t;
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  ['painel', 'videos', 'agenda', 'config'].forEach(x => $('#tab-' + x).classList.toggle('hide', x !== t));
+  $('#fab').classList.toggle('hide', !(t === 'agenda' || t === 'painel'));
+  if (t === 'config') preencherCfg();
+  render(); window.scrollTo(0, 0);
+}
+
+/* ---------------- formulário da agenda ---------------- */
+let editId = null, notaSel = 0;
+$('#aCanal').innerHTML = CANAIS.map(c => `<option value="${c.handle}">${esc(c.nome)}</option>`).join('');
+function pintarNotas() { $('#aNotas').innerHTML = Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<button type="button" data-nota="${n}" class="${n === notaSel ? 'on ' + notaCls(n) : ''}">${n}</button>`).join(''); }
+function abrir(a, pre = {}) {
+  editId = a?.id || null;
+  $('#dlgT').textContent = a ? 'Editar vídeo agendado' : 'Agendar vídeo';
+  $('#aCanal').value = a?.canal || pre.canal || CANAIS[0].handle;
+  $('#aData').value = a?.data || pre.data || hoje();
+  $('#aHora').value = a?.hora || '';
+  $('#aTit').value = a?.titulo || '';
+  $('#aSt').value = a?.status || 'agendado';
+  $('#aObs').value = a?.obs || '';
+  $('#aVid').value = a?.video || '';
+  notaSel = a?.nota || 0; pintarNotas();
+  $('#aDel').classList.toggle('hide', !a);
+  $('#dlg').showModal();
+  if (!a) setTimeout(() => $('#aTit').focus(), 50);
+}
+$('#aNotas').addEventListener('click', e => { const b = e.target.closest('[data-nota]'); if (b) { notaSel = +b.dataset.nota; pintarNotas(); } });
+$('#aCan').onclick = () => $('#dlg').close();
+$('#dlg').addEventListener('click', e => { if (e.target === $('#dlg')) $('#dlg').close(); });
+$('#fAg').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!notaSel) { toast('Escolha uma nota de 1 a 10'); return; }
+  const item = { id: editId || uid(), canal: $('#aCanal').value, data: $('#aData').value, hora: $('#aHora').value, titulo: $('#aTit').value.trim(), nota: notaSel, status: $('#aSt').value, obs: $('#aObs').value.trim(), video: $('#aVid').value.trim(), upd: Date.now() };
+  const i = dados.agenda.findIndex(a => a.id === item.id);
+  if (i >= 0) dados.agenda[i] = item; else dados.agenda.push(item);
+  $('#dlg').close(); salvarDados(); render(); toast(editId ? 'Atualizado' : 'Agendado');
+});
+$('#aDel').onclick = () => {
+  if (!editId || !confirm('Excluir este vídeo da agenda?')) return;
+  dados.agenda = dados.agenda.filter(a => a.id !== editId);
+  dados.excluidos[editId] = Date.now();
+  $('#dlg').close(); salvarDados(); render(); toast('Excluído');
+};
+
+/* ---------------- GitHub (sincronização opcional) ---------------- */
+const ghOn = () => cfg.gh.token && cfg.gh.repo;
+const b64e = s => btoa(unescape(encodeURIComponent(s)));
+const b64d = s => decodeURIComponent(escape(atob(s.replace(/\s/g, ''))));
+async function gh(method, body) {
+  const { token, repo, branch, path } = cfg.gh;
+  const u = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path || 'painel.json').replace(/%2F/g, '/')}` + (method === 'GET' ? `?ref=${encodeURIComponent(branch || 'main')}&t=${Date.now()}` : '');
+  const r = await fetch(u, { method, headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: body && JSON.stringify(body), cache: 'no-store' });
+  if (method === 'GET' && r.status === 404) return null;
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(j.message || 'Erro ' + r.status); e.status = r.status; throw e; }
+  return j;
+}
+function mesclar(a, b) {
+  const exc = { ...(a.excluidos || {}) };
+  Object.entries(b.excluidos || {}).forEach(([k, v]) => { exc[k] = Math.max(exc[k] || 0, v); });
+  const m = {};
+  [...(a.agenda || []), ...(b.agenda || [])].forEach(it => { if (!m[it.id] || (it.upd || 0) > (m[it.id].upd || 0)) m[it.id] = it; });
+  const agenda = Object.values(m).filter(it => !(exc[it.id] >= (it.upd || 0)));
+  const sn = k => ({ ...(b.snaps?.[k] || {}), ...(a.snaps?.[k] || {}) });
+  const snaps = { canais: sn('canais'), videos: sn('videos') };
+  const dv = Object.keys(snaps.videos).sort(); while (dv.length > 10) delete snaps.videos[dv.shift()];
+  return { agenda, excluidos: exc, snaps };
+}
+const canon = o => JSON.stringify(o, (k, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.keys(v).sort().reduce((r, x) => (r[x] = v[x], r), {}) : Array.isArray(v) && v.length && v[0]?.id ? [...v].sort((a, b) => a.id.localeCompare(b.id)) : v);
+let syncT, sincronizando = false, pendente = false;
+function salvarDados() {
+  gravar(LS_D, dados);
+  if (ghOn()) { clearTimeout(syncT); syncT = setTimeout(sincronizar, 1200); }
+}
+async function sincronizar(msgEl) {
+  if (!ghOn()) return;
+  if (sincronizando) { pendente = true; return; }
+  sincronizando = true;
+  try {
+    for (let t = 0; t < 2; t++) {
+      const rem = await gh('GET');
+      const remoto = rem ? JSON.parse(b64d(rem.content)) : novoDados();
+      const junto = mesclar(dados, remoto);
+      const txt = JSON.stringify(junto);
+      if (rem && canon(junto) === canon(mesclar(remoto, remoto))) { dados = junto; break; }
+      try {
+        await gh('PUT', { message: 'Atualiza painel ' + new Date().toISOString(), content: b64e(txt), sha: rem?.sha, branch: cfg.gh.branch || 'main' });
+        dados = junto; break;
+      } catch (e) { if (e.status !== 409 || t) throw e; }
+    }
+    gravar(LS_D, dados); render();
+    if (msgEl) msgEl.innerHTML = `<div class="ok">Sincronizado às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>`;
+  } catch (e) {
+    console.warn(e);
+    const m = e.status === 401 ? 'token inválido' : e.status === 404 ? 'repositório não encontrado ou sem acesso' : e.message;
+    if (msgEl) msgEl.innerHTML = `<div class="ko">Falhou: ${esc(m)}</div>`; else toast('Sincronização falhou: ' + m);
+  }
+  sincronizando = false;
+  if (pendente) { pendente = false; sincronizar(); }
+}
+
+/* ---------------- ajustes ---------------- */
+function preencherCfg() {
+  $('#cApi').value = cfg.apiKey; $('#cTok').value = cfg.gh.token; $('#cRepo').value = cfg.gh.repo;
+  $('#cBr').value = cfg.gh.branch || 'main'; $('#cPath').value = cfg.gh.path || 'painel.json';
+  $('#cLim').innerHTML = Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<option value="${n}" ${n === cfg.limite ? 'selected' : ''}>Nota ${n} ou menos</option>`).join('');
+}
+$('#cApiSalvar').onclick = async () => {
+  cfg.apiKey = $('#cApi').value.trim(); gravar(LS_CFG, cfg);
+  if (!cfg.apiKey) { $('#cApiMsg').innerHTML = ''; mostrarAvisos(); return; }
+  $('#cApiMsg').innerHTML = '<div class="sub" style="margin-top:8px">Buscando os canais…</div>';
+  try { await yt('channels', { part: 'id', forHandle: '@' + CANAIS[0].handle }); $('#cApiMsg').innerHTML = '<div class="ok">Chave funcionando.</div>'; await atualizar(); }
+  catch (e) { $('#cApiMsg').innerHTML = `<div class="ko">${esc(e.message)}</div>`; }
+};
+$('#cGhSalvar').onclick = () => {
+  cfg.gh = { token: $('#cTok').value.trim(), repo: $('#cRepo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, ''), branch: $('#cBr').value.trim() || 'main', path: $('#cPath').value.trim() || 'painel.json' };
+  gravar(LS_CFG, cfg);
+  if (!ghOn()) { $('#cGhMsg').innerHTML = '<div class="ko">Preencha token e repositório.</div>'; return; }
+  $('#cGhMsg').innerHTML = '<div class="sub" style="margin-top:8px">Sincronizando…</div>';
+  sincronizar($('#cGhMsg'));
+};
+$('#cGhDesl').onclick = () => { cfg.gh = { token: '', repo: '', branch: 'main', path: 'painel.json' }; gravar(LS_CFG, cfg); preencherCfg(); $('#cGhMsg').innerHTML = '<div class="sub" style="margin-top:8px">Sincronização desligada. A agenda continua salva neste navegador.</div>'; };
+$('#cLim').onchange = e => { cfg.limite = +e.target.value; gravar(LS_CFG, cfg); };
+$('#cExp').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' }));
+  a.download = `painel-canais-${hoje()}.json`; a.click();
+};
+$('#cImp').onclick = () => $('#cImpF').click();
+$('#cImpF').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const j = JSON.parse(await f.text()); if (!Array.isArray(j.agenda)) throw 0; dados = mesclar(j, dados); salvarDados(); render(); toast('Backup importado'); }
+  catch { toast('Arquivo inválido'); }
+  e.target.value = '';
+};
+
+/* ---------------- eventos gerais ---------------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-tab],[data-goto],[data-edit],[data-novo],[data-fc]');
+  if (!t) return;
+  if (t.dataset.tab) ir(t.dataset.tab);
+  else if (t.dataset.goto) ir(t.dataset.goto);
+  else if (t.dataset.edit) abrir(dados.agenda.find(a => a.id === t.dataset.edit));
+  else if (t.dataset.novo) { const [canal, data] = t.dataset.novo.split('|'); abrir(null, { canal, data }); }
+  else if (t.dataset.fc) { fCanal = t.dataset.fc; limV = 30; renderVideos(); }
+});
+$('#fab').onclick = () => abrir(null, { data: aba === 'agenda' && agIni > hoje() ? agIni : hoje() });
+$('#btnRef').onclick = () => { atualizar(true); if (ghOn()) sincronizar(); };
+['#fPer', '#fOrd'].forEach(s => $(s).onchange = () => { limV = 30; renderVideos(); });
+$('#fBusca').oninput = () => { limV = 30; renderVideos(); };
+$('#maisV').onclick = () => { limV += 30; renderVideos(); };
+$('#agPrev').onclick = () => { agIni = addD(agIni, -7); renderAgenda(); };
+$('#agNext').onclick = () => { agIni = addD(agIni, 7); renderAgenda(); };
+$('#agHoje').onclick = () => { agIni = hoje(); renderAgenda(); };
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (ghOn()) sincronizar(); render(); } });
+
+/* ---------------- início ---------------- */
+mostrarAvisos();
+ir('painel');
+if (ghOn()) sincronizar();
+if (cfg.apiKey && (!cache.em || Date.now() - new Date(cache.em) > 30 * 60 * 1000)) atualizar();
+</script>
+</body>
+</html>
